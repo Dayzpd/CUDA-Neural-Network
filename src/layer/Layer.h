@@ -1,27 +1,41 @@
+
+#include "Neuron.h"
+
 using namespace std;
 
-class Layer
-{
-  public:
-    const vector<string> ALLOWED_LAYER_TYPES = {
-      "INPUT", "HIDDEN", "OUTPUT"
-    };
+#ifndef LAYER_H
+#define LAYER_H
 
-    Layer();
+namespace neural_network {
 
-    virtual Layer(string layer_type, int num_neurons);
+  class Layer
+  {
+    public:
+      enum {
+        INPUT = "INPUT",
+        HIDDEN = "HIDDEN",
+        OUTPUT = "OUTPUT"
+      };
 
-    virtual Layer(string layer_type);
+      Layer();
 
-    virtual void populate_layer(int num_neurons) = 0;
+      ~Layer();
 
-    virutal bool connect_layer(Layer next_layer) = 0;
+      virtual void add_neuron(Neuron* neuron) = 0;
 
-    virtual void get_num_neurons();
+      virtual void populate_layer() = 0;
 
-    virtual void set_num_neurons(int num_neurons);
+      virtual void populate_layer() = 0;
 
-    virtual void get_layer_type();
+      virtual int get_num_neurons();
 
-    virtual void set_layer_type(string layer_type);
+      virtual void set_num_neurons(int num_neurons);
+
+      virtual Layer* get_prev_layer();
+
+      virtual void set_prev_layer(Layer* prev_layer);
+  }
+
 }
+
+#endif
