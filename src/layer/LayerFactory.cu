@@ -5,58 +5,47 @@
 #include "HiddenLayer.h"
 #include "OutputLayer.h"
 
-using namespace std;
-
+#include <memory>
 #include <stdexcept>
 
 namespace neural_network
 {
 
+  /// <summary>The <c>LayerFactory</c> allows for dynamic creation of a layer
+  /// given a user-specified type. For more information on the design of this
+  /// class, see Factories at
+  /// en.wikibooks.org/wiki/C%2B%2B_Programming/Code/Design_Patterns</summary>
   class LayerFactory
   {
     public:
-      Layer* create(const str layer_type, int num_neurons, Layer* prev_layer=0)
-      {
-        if (!is_accepted_type(layer_type))
-        {
-          throw runtime_error(layer_type + " is an invalid layer type. " +
-            "Accepted types include: " + this->accepted_types_to_string());
-        }
 
+      enum LayerType {
+        INPUT, HIDDEN, OUTPUT
+      };
+
+      /// <summary><c>create</c> serves as the factory function for the
+      /// <c>LayerFactory</c> class that returns a layer of the specified type.
+      /// See en.cppreference.com/w/cpp/memory/unique_ptr/make_unique for more
+      /// information.</summary>
+      /// <param name="layer_type">The <c>LayerFactory</c> class supplies
+      /// constants that must to be used (e.g. <c>LayerFactory::INPUT</c>,
+      /// <c>LayerFactory::HIDDEN</c>, or <c>LayerFactory::OUTPUT</c>).
+      /// </param name>
+      /// <returns>Returns a pointer to a layer of the specified type.</returns>
+      static std::unique_ptr<Layer> create_layer(LayerType layer_type)
+      {
         switch (layer_type)
         {
-          case Layer::INPUT: // Input Layer
-            InputLayer input_layer;
-            input_layer.set_num_neurons(num_neurons);
-            input_layer.populate_layer();
-            break;
-          case Layer::HIDDEN: // Hidden Layer
-            HiddenLayer hidden_layer;
-            hidden_layer.set_num_neurons(num_neurons);
-            hidden_layer.populate_layer();
-            hidden_layer.connect
-            break;
-          case Layer::OUTPUT: // Output Layer
-            OutputLayer output_layer;
-            break;
+          case INPUT:
+            return std::make_unique<InputLayer>();
+          case HIDDEN:
+            return std::make_unique<HiddenLayer>();
+          case OUTPUT:
+            return std::make_unique<OutputLayer>();
         }
-      }
-
-      bool is_accepted_type(const str layer_type)
-      {
-        return find(this->LAYER_TYPES.begin(), this->LAYER_TYPES.end(),
-          layer_type);
-      }
-
-      string accepted_types_to_string()
-      {
-        string accepted_types = "[ ";
-        for (int x = Layer::INPUT; x < Layer::OUTPUT; x++)
-        {
-          accepted_types += x + ", ";
-        }
-        accepted_types += " ]";
-        return accepted_types;
+        throw runtime_error(layer_type + " is an invalid layer type. " +
+          "Accepted types include: LayerFactory::INPUT, LayerFactory::HIDDEN," +
+          " LayerFactory::OUTPUT.");
       }
   }
 
