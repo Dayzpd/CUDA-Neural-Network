@@ -1,19 +1,19 @@
 
 #include "ActivationFunction.h"
 
-#ifndef RELU_H
-#define RELU_H
+#ifndef TANH_H
+#define TANH_H
 
 namespace neural_network {
 
-  class ReLU : public ActivationFunction
+  class TanH : public ActivationFunction
   {
     public:
-      ~ReLU();
+      ~TanH();
 
       double calculate(double& x);
 
-      int calculate_deriv(double& x);
+      double calculate_deriv(double& x)
   }
 
 }

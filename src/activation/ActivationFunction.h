@@ -1,6 +1,6 @@
 
-#ifndef ACTIVATOR_H
-#define ACTIVATOR_H
+#ifndef ACTIVATION_FUNCTION_H
+#define ACTIVATION_FUNCTION_H
 
 namespace neural_network {
 
@@ -12,6 +12,11 @@ namespace neural_network {
       virtual ~ActivationFunction();
 
       virtual double calculate(double& x) = 0;
+
+      virtual double calculate_deriv(double& x);
+
+      virtual int calculate_deriv(double& x);
+
   }
 
 }

@@ -14,9 +14,13 @@ namespace neural_network {
 
       ~InputLayer();
 
-      void add_neuron(InputNeuron neuron, BiasNeuron bias_neuron);
+      void add_neuron(InputNeuron neuron);
 
       void populate_layer();
+
+      int get_input_size();
+
+      void set_input_size(int input_size) = 0;
 
       int get_num_neurons();
 

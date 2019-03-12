@@ -1,15 +1,15 @@
 
 #include "ActivationFunction.h"
 
-#ifndef RELU_H
-#define RELU_H
+#ifndef LINEAR_H
+#define LINEAR_H
 
 namespace neural_network {
 
-  class ReLU : public ActivationFunction
+  class Linear : public ActivationFunction
   {
     public:
-      ~ReLU();
+      ~Linear();
 
       double calculate(double& x);
 

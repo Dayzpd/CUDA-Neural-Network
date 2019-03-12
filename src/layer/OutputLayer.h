@@ -15,7 +15,23 @@ namespace neural_network {
       vector<OutputNeuron> neurons;
 
     public:
-      const string LAYER_TYPE = Layer::ALLOWED_LAYER_TYPES[2];
+      OutputLayer();
+
+      ~OutputLayer();
+
+      void add_neuron(OutputNeuron neuron);
+
+      void populate_layer();
+
+      void connect_neurons();
+
+      int get_num_neurons();
+
+      void set_num_neurons(int num_classes);
+
+      Layer* get_prev_layer();
+
+      void set_prev_layer(Layer* prev_layer);
   }
 
 }

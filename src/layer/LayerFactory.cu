@@ -18,11 +18,6 @@ namespace neural_network
   class LayerFactory
   {
     public:
-
-      enum LayerType {
-        INPUT, HIDDEN, OUTPUT
-      };
-
       /// <summary><c>create</c> serves as the factory function for the
       /// <c>LayerFactory</c> class that returns a layer of the specified type.
       /// See en.cppreference.com/w/cpp/memory/unique_ptr/make_unique for more
@@ -32,20 +27,20 @@ namespace neural_network
       /// <c>LayerFactory::HIDDEN</c>, or <c>LayerFactory::OUTPUT</c>).
       /// </param name>
       /// <returns>Returns a pointer to a layer of the specified type.</returns>
-      static std::unique_ptr<Layer> create_layer(LayerType layer_type)
+      static std::unique_ptr<Layer> create(LayerType layer_type)
       {
         switch (layer_type)
         {
           case INPUT:
             return std::make_unique<InputLayer>();
-          case HIDDEN:
-            return std::make_unique<HiddenLayer>();
+          case FULLY_CONNECTED:
+            return std::make_unique<FullyConnectedLayer>();
           case OUTPUT:
             return std::make_unique<OutputLayer>();
         }
         throw runtime_error(layer_type + " is an invalid layer type. " +
-          "Accepted types include: LayerFactory::INPUT, LayerFactory::HIDDEN," +
-          " LayerFactory::OUTPUT.");
+          "Accepted types include: LayerFactory::INPUT, " +
+          "LayerFactory::FULLY_CONNECTED, LayerFactory::OUTPUT.");
       }
   }
 

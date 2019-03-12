@@ -10,7 +10,11 @@ namespace neural_network
   class LayerFactory
   {
     public:
-      virtual Layer* create(const str layer_type) = 0;
+      enum LayerType {
+        INPUT, FULLY_CONNECTED, OUTPUT
+      };
+
+      virtual Layer* create(LayerType layer_type) = 0;
   }
 
 }
