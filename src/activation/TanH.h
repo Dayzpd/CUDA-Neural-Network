@@ -9,6 +9,8 @@ namespace neural_network {
   class TanH : public ActivationFunction
   {
     public:
+      TanH();
+
       ~TanH();
 
       double calculate(double& x);

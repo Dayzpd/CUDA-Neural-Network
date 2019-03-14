@@ -4,50 +4,45 @@
 
 namespace neural_network {
 
-  class LeakyReLU : public ActivationFunction
-  {
-    public:
+    LeakyReLU::LeakyReLU();
 
-      LeakyReLU();
+    LeakyReLU::~LeakyReLU();
 
-      ~LeakyReLU();
-
-      /// <summary>Leaky Rectified Linear Unit activation function.</summary>
-      /// <param name="x">Represents the aggregated value obtained during
-      /// forward propagation (bias + sum(inputs * weights)) for a given neuron
-      /// </param name>
-      /// <returns>Returns <c>x</c> if the input value <c>x</c> is >= 0, else
-      /// <c>0.01 * x</c> is returned.</returns>
-      double calculate(double& x)
+    /// <summary>Leaky Rectified Linear Unit activation function.</summary>
+    /// <param name="x">Represents the aggregated value obtained during
+    /// forward propagation (bias + sum(inputs * weights)) for a given neuron
+    /// </param name>
+    /// <returns>Returns <c>x</c> if the input value <c>x</c> is >= 0, else
+    /// <c>0.01 * x</c> is returned.</returns>
+    double LeakyReLU::calculate(double& x)
+    {
+      if (x >= 0)
       {
-        if (x >= 0)
-        {
-          return 1;
-        }
-        else
-        {
-          return 0.01;
-        }
+        return 1;
       }
-
-      /// <summary>Derivative of Leaky Rectified Linear Unit activation
-      /// function.</summary>
-      /// <param name="x">Represents the aggregated value obtained during
-      /// forward propagation (bias + sum(inputs * weights)) for a given neuron
-      /// </param name>
-      /// <returns>Returns 1 if the input value <c>x</c> is >= 0, else 0.01 is
-      /// returned.</returns>
-      double calculate_deriv(double& x)
+      else
       {
-        if (x >= 0)
-        {
-          return 1;
-        }
-        else
-        {
-          return 0.01;
-        }
+        return 0.01;
       }
-  }
+    }
+
+    /// <summary>Derivative of Leaky Rectified Linear Unit activation
+    /// function.</summary>
+    /// <param name="x">Represents the aggregated value obtained during
+    /// forward propagation (bias + sum(inputs * weights)) for a given neuron
+    /// </param name>
+    /// <returns>Returns 1 if the input value <c>x</c> is >= 0, else 0.01 is
+    /// returned.</returns>
+    double LeakyReLU::calculate_deriv(double& x)
+    {
+      if (x >= 0)
+      {
+        return 1;
+      }
+      else
+      {
+        return 0.01;
+      }
+    }
 
 }

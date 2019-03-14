@@ -15,8 +15,6 @@ namespace neural_network {
 
       virtual double calculate_deriv(double& x);
 
-      virtual int calculate_deriv(double& x);
-
   }
 
 }

@@ -10,9 +10,9 @@ namespace neural_network {
   class Layer
   {
     public:
-      virtual ~Layer();
+      Layer();
 
-      virtual void add_neuron(Neuron* neuron) = 0;
+      virtual ~Layer();
 
       virtual void populate_layer() = 0;
 

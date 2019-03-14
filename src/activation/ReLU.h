@@ -9,6 +9,8 @@ namespace neural_network {
   class ReLU : public ActivationFunction
   {
     public:
+      ReLU();
+
       ~ReLU();
 
       double calculate(double& x);

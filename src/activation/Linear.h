@@ -9,6 +9,8 @@ namespace neural_network {
   class Linear : public ActivationFunction
   {
     public:
+      Linear();
+      
       ~Linear();
 
       double calculate(double& x);
