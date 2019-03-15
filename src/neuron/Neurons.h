@@ -7,10 +7,13 @@ namespace neural_network {
 
   class Neurons
   {
-    public:
-      virtual ~Neurons();
+    private:
+      int num_rows;
+      int num_cols;
+      ActivationFunction* act_func;
+      Layer* layer;
 
-      virtual void mat_mul()
+    public:
   }
 
 }

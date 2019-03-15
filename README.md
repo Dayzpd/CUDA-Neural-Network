@@ -16,30 +16,20 @@ As previously mentioned, my experience is limited so as I discover new things or
 run into problems this may change slightly.
 
 ### Components
-- Network (inherits from doubly linked list)
-- Layers
-  - Input Layer (in progress)
-  - Fully Connected Layer (in progress)
-  - Output Layer (in progress)
-- Neurons (inherits from matrix)
-- Activation Function
-  - Fast Sigmoid (Approximates Sigmoid function)
-  - Leaky ReLU
-  - ReLU
-  - TanH
-- Loss Function (undetermined)
-
-### Putting the Puzzle Pieces Together
-A network needs and an input layer, output layer, and whatever hidden layers
-that the user specifies (Fully Connected, Convolutional, Pooling). Layers are
-added to the network using a [factory method](https://en.wikipedia.org/wiki/Factory_method_pattern) inside the Network class. In order to build any given
-layer, you must supply it with the numbers of neurons it should have, and the
-activation function it should use (activation function is not applicable for
-input layers). Layers must be added to the network in proper order (i.e. input
-layer -> hidden layer(s) -> output layer).
-
-As for selecting activation functions, this seems to me to be a case wherein
-static polymorphism rears its head. Since the
-
-
-### Flow of Network Creation
+- Network
+  - Actions:
+    - Constructs layers of Neurons
+    - Trains network once network layout is constructed
+  - Supply these for instantiation:
+    - Input size
+    - Learning rate
+    - Output classes
+    - Loss Function strategy (e.g. Binary Cross Entropy, Hinge, Mean Squared,
+      Multi Class Cross Entropy)
+    - Optimize Function strategy (e.g. Gradient Descent)
+  - Before training, construct layers in order of how you would like
+    - Layers, from the perspective of the network, are Neurons objects
+    - Neurons
+      - the numbers of neurons it should have
+      - activation function strategy (e.g. Fast Sigmoid, Leaky ReLU, ReLU, TanH)
+      - layer strategy (e.g. Convolutional, Fully Connected, Pooling, Output)

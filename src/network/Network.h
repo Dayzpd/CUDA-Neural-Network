@@ -1,24 +1,30 @@
 
-#include "../helpers/DoublyLinkedList.h"
-#include "../layer/Layer.h"
 
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include "../neuron/Neurons.h"
+
 namespace neural_network
 {
 
-  class Network : DoublyLinkedList
+  class Network
   {
     private:
-      int num_layers;
+      double learning_rate;
+      Neurons* head_layer; // First hidden layer.
+      Neurons* tail_layer; // Should always have output layer strategy.
 
     public:
-      enum LayerType {
-        INPUT, FULLY_CONNECTED, OUTPUT
-      };
+      Network(double learning_rate, LossFunction::Type loss_function);
 
-      virtual Layer* add_layer(LayerType layer_type) = 0;
+      ~Network();
+
+      void add_layer();
+
+      Neurons* get_prev_layer();
+
+      Neurons* get_next_layer();
   }
 
 }

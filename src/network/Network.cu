@@ -11,37 +11,21 @@
 namespace neural_network
 {
 
-  /// <summary>The <c>LayerFactory</c> allows for dynamic creation of a layer
-  /// given a user-specified type. For more information on the design of this
-  /// class, see Factories at
-  /// en.wikibooks.org/wiki/C%2B%2B_Programming/Code/Design_Patterns</summary>
-  class LayerFactory
+  Network::Network()
   {
-    public:
-      /// <summary><c>create</c> serves as the factory function for the
-      /// <c>LayerFactory</c> class that returns a layer of the specified type.
-      /// See en.cppreference.com/w/cpp/memory/unique_ptr/make_unique for more
-      /// information.</summary>
-      /// <param name="layer_type">The <c>LayerFactory</c> class supplies
-      /// constants that must to be used (e.g. <c>LayerFactory::INPUT</c>,
-      /// <c>LayerFactory::HIDDEN</c>, or <c>LayerFactory::OUTPUT</c>).
-      /// </param name>
-      /// <returns>Returns a pointer to a layer of the specified type.</returns>
-      static std::unique_ptr<Layer> create(LayerType layer_type)
-      {
-        switch (layer_type)
-        {
-          case INPUT:
-            return std::make_unique<InputLayer>();
-          case FULLY_CONNECTED:
-            return std::make_unique<FullyConnectedLayer>();
-          case OUTPUT:
-            return std::make_unique<OutputLayer>();
-        }
-        throw runtime_error(layer_type + " is an invalid layer type. " +
-          "Accepted types include: LayerFactory::INPUT, " +
-          "LayerFactory::FULLY_CONNECTED, LayerFactory::OUTPUT.");
-      }
+    this->num_layers = 0;
   }
+
+  Network::~Network()
+  {
+    // delete layers: start with head and continue thru to tail.
+  }
+
+  void Network::add_layer()
+  {
+
+  }
+
+
 
 }
