@@ -7,8 +7,11 @@
 namespace neural_network
 {
 
-  class LossFunction
+  class LossFactory
   {
+    private:
+      LossFactory() {}
+
     public:
       enum Type {
         BINARY_CROSS_ENTROPY = "BINARY_CROSS_ENTROPY",
@@ -17,7 +20,9 @@ namespace neural_network
         MULTI_CLASS_CROSS_ENTROPY = "MULTI_CLASS_CROSS_ENTROPY"
       };
 
-      static LossFunction* create(Type loss_type);
+      static LossFactory& get_instance();
+
+      static LossFunction& create(Type loss_type);
   }
 
 }

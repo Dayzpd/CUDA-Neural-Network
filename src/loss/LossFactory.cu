@@ -11,26 +11,28 @@ namespace neural_network
 {
   /// <summary><c>create</c> serves as a factory function that returns an
   /// loss function of the specified type.</summary>
-  /// <param name="loss_type">The <c>LossFactory</c>
-  /// class supplies constants that must to be used (e.g.
-  /// <c>LossFactory::BINARY_CROSS_ENTROPY</c>,
-  /// <c>LossFactory::HINGE</c>,
-  /// <c>LossFactory::MEAN_SQUARED_ERROR</c>,
+  /// <param name="loss_type">The <c>LossFactory</c> class supplies constants
+  /// that must to be used (e.g. <c>LossFactory::BINARY_CROSS_ENTROPY</c>,
+  /// <c>LossFactory::HINGE</c>, <c>LossFactory::MEAN_SQUARED_ERROR</c>,
   /// <c>LossFactory::MULTI_CLASS_CROSS_ENTROPY</c></param name>
   /// <returns>Returns a pointer to an loss function of the specified
   /// type.</returns>
-  std::unique_ptr<LossFunction> LossFactory::create(Type loss_type)
+  LossFunction& LossFactory::create(Type loss_type)
   {
     switch (loss_type)
     {
       case BINARY_CROSS_ENTROPY:
-        return std::make_unique<BinaryCrossEntropy>();
+        static BinaryCrossEntropy bce_instance;
+        return bce_instance;
       case HINGE:
-        return std::make_unique<Hinge>();
+        static Hinge hinge_instance;
+        return hinge_instance;
       case MEAN_SQUARED_ERROR:
-        return std::make_unique<MeanSquaredError>();
+        static MeanSquaredError mse_instance;
+        return mse_instance;
       case MULTI_CLASS_CROSS_ENTROPY:
-        return std::make_unique<MultiClassCrossEntropy>();
+        static MultiClassCrossEntropy mc_ce_instance;
+        return multi_class_ce_instance;
     }
     throw runtime_error("An invalid loss function type was given. " +
       "Accepted types include: " +
