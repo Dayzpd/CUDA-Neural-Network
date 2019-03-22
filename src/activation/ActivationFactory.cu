@@ -11,33 +11,48 @@
 
 namespace neural_network
 {
+
+  /// <summary><c>get_instance</c> returns the singleton instance to give the
+  /// Network class the ability to create new activation strategies.</summary>
+  /// <returns>Returns the singleton instance of <c>ActivationFactory</c>.
+  /// </returns>
+  ActivationFactory& ActivationFactory::get_instance()
+  {
+    static ActivationFactory factory_instance;
+    return factory_instance;
+  }
+
   /// <summary><c>create</c> serves as a factory function that returns an
   /// activation function of the specified type.</summary>
-  /// <param name="activation_type">The <c>ActivationFactory</c>
-  /// class supplies constants that must to be used (e.g.
+  /// <param name="activation_type">The <c>ActivationFactory</c> class supplies
+  /// constants that must to be used (e.g.
   /// <c>ActivationFactory::FAST_SIGMOID</c>,
   /// <c>ActivationFactory::LEAKY_RELU</c>,
   /// <c>ActivationFactory::LINEAR</c>,
   /// <c>ActivationFactory::RELU</c>,
   /// <c>ActivationFactory::SIGMOID</c>,
   /// <c>ActivationFactory::TANH</c>).</param name>
-  /// <returns>Returns a pointer to an activation function of the specified
+  /// <returns>Returns a reference to an activation function of the specified
   /// type.</returns>
-  std::unique_ptr<ActivationFunction> ActivationFactory::create(
-    Type activation_type
-  ) {
+  ActivationFunction& ActivationFactory::create(Type activation_type)
+  {
     switch (activation_type)
     {
       case FAST_SIGMOID:
-        return std::make_unique<FastSigmoid>();
+        static FastSigmoid fast_sigmoid_instance;
+        return fast_sigmoid;
       case LEAKY_RELU:
-        return std::make_unique<LeakyReLU>();
+        static LeakyReLU leaky_relu_instance;
+        return leaky_relu_instance;
       case LINEAR:
-        return std::make_unique<Linear>();
+        static Linear linear_instance;
+        return linear_instance;
       case RELU:
-        return std::make_unique<ReLU>();
+        static ReLU relu_instance;
+        return relu_instance;
       case TANH:
-        return std::make_unique<TanH>();
+        static TanH tanh_instance;
+        return tanh_instance;
     }
     throw runtime_error("An invalid activation function type was given. " +
       "Accepted types include: " +

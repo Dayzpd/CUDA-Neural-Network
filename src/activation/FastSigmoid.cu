@@ -5,11 +5,6 @@
 #include <math.h>
 
 namespace neural_network {
-
-  FastSigmoid::FastSigmoid();
-
-  FastSigmoid::~FastSigmoid();
-
   /// <summary>Approximated Sigmoid activation function.</summary>
   /// <param name="x">Represents the aggregated value obtained during
   /// forward propagation (bias + sum(inputs * weights)) for a given neuron

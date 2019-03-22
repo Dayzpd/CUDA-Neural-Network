@@ -6,13 +6,9 @@
 
 namespace neural_network {
 
-  class FastSigmoid : public ActivationFunction
+  class FastSigmoid : public ActivationFunction<FastSigmoid>
   {
     public:
-      FastSigmoid();
-
-      ~FastSigmoid();
-
       double calculate(double& x);
 
       double calculate_deriv(double& x);

@@ -5,12 +5,13 @@
 namespace neural_network
 {
 
+  template <typename Derived>
   class ActivationFunction
   {
     public:
-      virtual double calculate(double& x) = 0;
+      double calculate(double& x);
 
-      virtual double calculate_deriv(double& x) = 0;
+      double calculate_deriv(double& x);
   }
 
 }

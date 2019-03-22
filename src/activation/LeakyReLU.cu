@@ -3,10 +3,6 @@
 
 namespace neural_network {
 
-    LeakyReLU::LeakyReLU();
-
-    LeakyReLU::~LeakyReLU();
-
     /// <summary>Leaky Rectified Linear Unit activation function.</summary>
     /// <param name="x">Represents the aggregated value obtained during
     /// forward propagation (bias + sum(inputs * weights)) for a given neuron
@@ -17,11 +13,11 @@ namespace neural_network {
     {
       if (x >= 0)
       {
-        return 1;
+        return x;
       }
       else
       {
-        return 0.01;
+        return 0.01 * x;
       }
     }
 
@@ -36,7 +32,7 @@ namespace neural_network {
     {
       if (x >= 0)
       {
-        return 1;
+        return 1.0;
       }
       else
       {

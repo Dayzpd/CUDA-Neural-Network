@@ -6,16 +6,12 @@
 
 namespace neural_network {
 
-  class Linear : public ActivationFunction
+  class Linear : public ActivationFunction<Linear>
   {
     public:
-      Linear();
-
-      ~Linear();
-
       double calculate(double& x);
 
-      int calculate_deriv(double& x);
+      double calculate_deriv(double& x);
   }
 
 }

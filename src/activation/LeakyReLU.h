@@ -6,13 +6,9 @@
 
 namespace neural_network {
 
-  class LeakyReLU : public ActivationFunction
+  class LeakyReLU : public ActivationFunction<LeakyReLU>
   {
     public:
-      LeakyReLU();
-
-      ~LeakyReLU();
-
       double calculate(double& x);
 
       double calculate_deriv(double& x);

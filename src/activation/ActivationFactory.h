@@ -7,6 +7,9 @@ namespace neural_network
 
   class ActivationFactory
   {
+    private:
+      ActivationFactory() {}
+
     public:
       enum Type {
         FAST_SIGMOID = "FAST_SIGMOID",
@@ -16,7 +19,9 @@ namespace neural_network
         TANH = "TANH"
       };
 
-      static ActivationFunction* create(Type activation_type);
+      static ActivationFactory& get_instance();
+
+      static ActivationFunction& create(Type activation_type);
   }
 
 }

@@ -6,13 +6,9 @@
 
 namespace neural_network {
 
-  class TanH : public ActivationFunction
+  class TanH : public ActivationFunction<TanH>
   {
     public:
-      TanH();
-
-      ~TanH();
-
       double calculate(double& x);
 
       double calculate_deriv(double& x)

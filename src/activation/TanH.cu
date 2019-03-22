@@ -5,10 +5,6 @@
 
 namespace neural_network {
 
-  TanH::TanH();
-
-  TanH::~TanH();
-
   /// <summary>Hyperbolic Tangent activation function.</summary>
   /// <param name="x">Represents the aggregated value obtained during
   /// forward propagation (bias + sum(inputs * weights)) for a given neuron.

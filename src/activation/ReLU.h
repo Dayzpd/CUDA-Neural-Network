@@ -6,16 +6,12 @@
 
 namespace neural_network {
 
-  class ReLU : public ActivationFunction
+  class ReLU : public ActivationFunction<ReLU>
   {
     public:
-      ReLU();
-
-      ~ReLU();
-
       double calculate(double& x);
 
-      int calculate_deriv(double& x);
+      double calculate_deriv(double& x);
   }
 
 }

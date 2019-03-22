@@ -3,10 +3,6 @@
 
 namespace neural_network {
 
-  Linear::Linear();
-
-  Linear::~Linear();
-
   /// <summary>Linear activation function.</summary>
   /// <param name="x">Represents the aggregated value obtained during
   /// forward propagation (bias + sum(inputs * weights)) for a given neuron
@@ -24,9 +20,9 @@ namespace neural_network {
   /// </param name>
   /// <returns>Always returns 1 because the derivative of any function f(x)
   /// results in f'(x) = 1.</returns>
-  int Linear::calculate_deriv(double& x)
+  double Linear::calculate_deriv(double& x)
   {
-    return 1;
+    return 1.0;
   }
 
 }
