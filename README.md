@@ -15,7 +15,6 @@ The following documents the current plan of how I am developing the framework.
 As previously mentioned, my experience is limited so as I discover new things or
 run into problems this may change slightly.
 
-### Components
 - Network
   - Actions:
     - Constructs layers of Neurons

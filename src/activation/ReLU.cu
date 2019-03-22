@@ -1,5 +1,4 @@
 
-#include "ActivationFunction.h"
 #include "ReLU.h"
 
 namespace neural_network {

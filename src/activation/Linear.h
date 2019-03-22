@@ -1,8 +1,8 @@
 
-#include "ActivationFunction.h"
-
 #ifndef LINEAR_H
 #define LINEAR_H
+
+#include "ActivationFunction.h"
 
 namespace neural_network {
 
@@ -10,7 +10,7 @@ namespace neural_network {
   {
     public:
       Linear();
-      
+
       ~Linear();
 
       double calculate(double& x);

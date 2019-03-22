@@ -2,11 +2,11 @@
 #ifndef FULLY_CONNECTED_H
 #define FULLY_CONNECTED_H
 
-#include "Layer.h"
+#include "Connection.h"
 
 namespace neural_network {
 
-  class FullyConnected : public Layer
+  class FullyConnected : public Connection
   {
     public:
 

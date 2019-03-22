@@ -1,8 +1,8 @@
 
-#include "ActivationFunction.h"
-
 #ifndef LEAKY_RELU_H
 #define LEAKY_RELU_H
+
+#include "ActivationFunction.h"
 
 namespace neural_network {
 
@@ -10,7 +10,7 @@ namespace neural_network {
   {
     public:
       LeakyReLU();
-      
+
       ~LeakyReLU();
 
       double calculate(double& x);

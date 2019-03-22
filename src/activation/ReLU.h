@@ -1,8 +1,8 @@
 
-#include "ActivationFunction.h"
-
 #ifndef RELU_H
 #define RELU_H
+
+#include "ActivationFunction.h"
 
 namespace neural_network {
 

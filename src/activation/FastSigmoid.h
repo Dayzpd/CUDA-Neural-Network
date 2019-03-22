@@ -1,8 +1,8 @@
 
-#include "ActivationFunction.h"
-
 #ifndef FAST_SIGMOID_H
 #define FAST_SIGMOID_H
+
+#include "ActivationFunction.h"
 
 namespace neural_network {
 
@@ -10,7 +10,7 @@ namespace neural_network {
   {
     public:
       FastSigmoid();
-      
+
       ~FastSigmoid();
 
       double calculate(double& x);

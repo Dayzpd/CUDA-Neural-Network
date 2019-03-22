@@ -1,5 +1,4 @@
 
-#include "ActivationFunction.h"
 #include "TanH.h"
 
 #include <math.h>

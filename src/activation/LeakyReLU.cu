@@ -1,5 +1,4 @@
 
-#include "ActivationFunction.h"
 #include "LeakyReLU.h"
 
 namespace neural_network {

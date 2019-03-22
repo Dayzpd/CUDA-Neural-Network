@@ -1,19 +1,18 @@
 
-#include "Layer.h"
-#include "LayerFactory.h"
-#include "InputLayer.h"
-#include "HiddenLayer.h"
-#include "OutputLayer.h"
-
-#include <memory>
-#include <stdexcept>
-
 namespace neural_network
 {
 
-  Network::Network()
+  Network::Network(int input_size, std::vector<string> classes,
+    double learning_rate, LossFunction::Type loss_strategy,
+    OptimizeFunction::Type optimize_function)
   {
-    this->num_layers = 0;
+    this->input_size = input_size;
+    this->classes = classes;
+    this->learning_rate = learning_rate;
+    this->loss_function = LossFunction::create(loss_strategy);
+    this->optimize_function = OptimizeFunction::create(optimize_strategy);
+    this->head_layer = NULL;
+    this->tail_layer = NULL;
   }
 
   Network::~Network()
@@ -23,7 +22,17 @@ namespace neural_network
 
   void Network::add_layer()
   {
+     = new Neuron(num_neurons, Layer::create(layer_strategy),
+      ActivationFunction::create(activation_strategy));
 
+    if (head_layer == NULL)
+    {
+      layer->set_num_connections
+    }
+    else
+    {
+
+    }
   }
 
 

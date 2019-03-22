@@ -2,11 +2,11 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-#include "Layer.h"
+#include "Connection.h"
 
 namespace neural_network {
 
-  class Output : public Layer
+  class Output : public Connection
   {
     public:
   }

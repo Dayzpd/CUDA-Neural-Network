@@ -1,8 +1,8 @@
 
-#include "ActivationFunction.h"
-
 #ifndef TANH_H
 #define TANH_H
+
+#include "ActivationFunction.h"
 
 namespace neural_network {
 

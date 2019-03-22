@@ -1,5 +1,4 @@
 
-#include "ActivationFunction.h"
 #include "Linear.h"
 
 namespace neural_network {

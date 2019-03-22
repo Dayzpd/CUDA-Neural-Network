@@ -1,5 +1,4 @@
 
-#include "ActivationFunction.h"
 #include "FastSigmoid.h"
 
 #include <cstdlib>
