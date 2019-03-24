@@ -23,3 +23,4 @@ run into problems this may change slightly.
   - In between adjacent Neurons objects, a Connection object determines how
     individual neurons in one layer connect to neurons in the next layer (e.g.
     Convolutional, Fully Connected, Pooling, Output).
+- Training (TBD)

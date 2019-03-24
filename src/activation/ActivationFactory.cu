@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 namespace neural_network
 {
@@ -34,7 +35,7 @@ namespace neural_network
   /// <c>ActivationFactory::TANH</c>).</param name>
   /// <returns>Returns a reference to an activation function of the specified
   /// type.</returns>
-  ActivationFunction& ActivationFactory::create(Type activation_type)
+  ActivationFunction& ActivationFactory::create(std::string activation_type)
   {
     switch (activation_type)
     {
