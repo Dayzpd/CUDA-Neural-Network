@@ -1,12 +1,12 @@
 
-#ifndef LAYER_H
-#define LAYER_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #include "../loss/LossFunction.h"
 #include "../layer/Layer.h"
 #include "../optimize/OptimizeFunction.h"
 
-#include <tuple>
+#include <string>
 #include <vector>
 
 namespace neural_network
@@ -15,25 +15,28 @@ namespace neural_network
   class Network
   {
     private:
-      int num_classes;
-      int learning_rate;
+      LayerFactory& layer_factory;
 
-      LossFunction* loss;
-      OptimizeFunction* optimize;
-
-      Layer* first_layer;
-      Layer* output_layer;
+      std::vector<Layer*> layers;
 
     public:
-      Network(int n_classes, int lr, std::string loss_type,
-        std::string opt_type);
+      Network();
 
       ~Network();
 
-      void add_layer(Layer* Layer);
+      // Activation Layer
+      void add_layer(std::string layer_type);
 
-      void train();
+      // Connection Layer
+      void add_layer(std::string layer_type, size_t x, size_t y);
 
+      void train(Features& features, int batch_size, float learning_rate);
+
+      void forward_propagate();
+
+      void back_propagate();
+
+      double calculate_loss();
   }
 
 }

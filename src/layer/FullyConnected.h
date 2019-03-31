@@ -3,33 +3,37 @@
 #define FULLY_CONNECTED_H
 
 #include "Layer.h"
+#include "../neurons/Dim.h"
+#include "../neurons/Neurons.h"
 
 namespace neural_network {
 
   class FullyConnected : public Layer
   {
     private:
-      int input_size;
-      int num_neurons;
-
-      std::vector<double> weights;
-      std::vector<double> biases;
-
-      ActivationFunction* act_func;
-
-      Layer* prev_layer;
-      Layer* next_layer;
-
-      void build_neurons();
+      Neurons weights;
+      Neurons biases;
+      Neurons layer_ouput;
+      Neurons optimized;
 
     public:
-      FullyConnected(int num_neurons, std::string act_type, Layer& p_layer);
+      FullyConnected(Dim dim, std::string act_type);
 
-      FullyConnected(int num_neurons, std::string act_type, int in_size);
+      ~FullyConnected();
 
-      const int& get_num_outputs();
+      Neurons& forward_prop(Neurons& input);
 
-      const std::vector<double>& activate();
+      Neurons& back_prop(Neurons& input, float learning_rate);
+
+      void initialize_neurons();
+
+      void init_weights();
+
+      void init_biases();
+
+      void init_layer_ouput();
+
+      void init_optimized();
   }
 
 }

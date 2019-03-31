@@ -2,10 +2,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "../activation/ActivationFunction.h"
-
-#include <string>
-#include <vector>
+#include "../neurons/Neurons.h"
 
 namespace neural_network
 {
@@ -13,21 +10,11 @@ namespace neural_network
   class Layer
   {
     public:
-      double rand_norm();
+      virtual ~Layer() = 0;
 
-      const int& get_num_neurons();
+      virtual Neurons& forward_prop(Neurons& input) = 0;
 
-      void set_prev_layer(Layer* p_layer);
-
-      void set_next_layer(Layer* n_layer);
-
-      void set_activation_function(std::string act_type);
-
-      virtual int calculate_num_outputs();
-
-      virtual const int& get_num_outputs() = 0;
-
-      virtual const std::vector<double>& activate() = 0;
+      virtual Neurons& back_prop(Neurons& input, float learning_rate) = 0;
   }
 
 }
