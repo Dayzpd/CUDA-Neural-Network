@@ -4,21 +4,30 @@
 #include "Network.h"
 
 
-Network::Network(int num_classes, float learning_rate, std::string loss_type,
-  std::string optimize_type) : num_classes(num_classes),
-  learning_rate(learning_rate)
+Network::Network(float learning_rate, std::string loss_type,
+  std::string optimize_type) : learning_rate(learning_rate)
 {
   this->layer_factory = LayerFactory::get_instance();
   this->loss_func = LossFactory::get_instance()->create(loss_type);
   this->optimize_func = OptimizeFactory::get_instance()->create(optimize_type);
 }
 
-Network::Network()
+Network::~Network()
 {
   for (auto layer : layers)
   {
     delete layer;
   }
+
+  for (auto feature : features)
+  {
+    delete feature;
+  }
+}
+
+void add_class(int class_num, std::string class_name)
+{
+  this->classes[class_num] = class_name;
 }
 
 void Network::add_feature(Neurons feature, Neurons class)
@@ -36,9 +45,25 @@ void Network::add_layer(std::string layer_type, size_t x, size_t y)
   this->layers.push_back(this->layer_factory->create(layer_type, Dim(x, y)));
 }
 
+std::string classify(Neurons& prediction)
+{
+  prediction->memcpy_device_to_host();
+
+  float max = prediction[0];
+  for (size_t x = 1; x < prediction.dim.x * prediction.dim.y; x++)
+  {
+    if (max < prediction[x])
+    {
+      max = prediction[x];
+    }
+  }
+
+  return this->classes[max];
+}
+
 int Network::get_num_classes()
 {
-  return num_classes;
+  return this->classes.size();
 }
 
 void Network::train()

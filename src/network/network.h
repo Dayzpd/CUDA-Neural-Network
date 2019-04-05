@@ -6,6 +6,7 @@
 #include "../layer/Layer.h"
 #include "../optimize/OptimizeFunction.h"
 
+#include <map>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -22,17 +23,20 @@ namespace neural_network
 
       std::vector<Layer*> layers;
 
+      std::map<int, std::string> classes;
       std::vector<tuple<Neurons, Neurons>> features;
 
-      int num_classes;
+      float learning_rate;
 
     public:
-      Network(int num_classes, float learning_rate, std::string loss_type,
+      Network(float learning_rate, std::string loss_type,
         std::string optimize_type);
 
       ~Network();
 
-      void add_feature(Neurons feature, Neurons class);
+      void add_class(int class_num, std::string class_name);
+
+      void add_feature(Neurons feature, int class);
 
       // Activation Layer
       void add_layer(std::string layer_type);
@@ -40,9 +44,11 @@ namespace neural_network
       // Connection Layer
       void add_layer(std::string layer_type, size_t x, size_t y);
 
+      std::string classify(Neurons& prediction);
+
       int get_num_classes();
 
-      void train(Features& features, int batch_size, float learning_rate);
+      void train();
 
       void forward_propagate();
 

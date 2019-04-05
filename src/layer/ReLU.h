@@ -9,6 +9,10 @@ namespace neural_network {
 
   class ReLU : public Layer
   {
+    private:
+      Neurons input;
+      Neurons output;
+
     public:
       ReLU();
 

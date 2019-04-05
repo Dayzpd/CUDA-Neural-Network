@@ -41,13 +41,24 @@ namespace neural_network
 
   void Neurons::reserve_memory()
   {
-    if (!is_host_allocated)
+
+    if (!is_host_reserved)
     {
       reserve_host_memory();
     }
 
-    if (!is_device_allocated)
+    if (!is_device_reserved)
     {
+      reserve_device_memory();
+    }
+  }
+
+  void Neurons::reserve_memory(Dim dim)
+  {
+    if (!is_host_reserved && !is_device_reserved)
+    {
+      this->dim = dim;
+      reserve_host_memory();
       reserve_device_memory();
     }
   }

@@ -9,6 +9,10 @@ namespace neural_network {
 
   class Sigmoid : public Layer
   {
+    private:
+      Neurons input;
+      Neurons output;
+
     public:
       Sigmoid();
 

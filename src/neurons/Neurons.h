@@ -13,7 +13,7 @@ namespace neural_network
   {
     private:
       bool is_host_reserved;
-      bool is_device_allocated;
+      bool is_device_reserved;
 
       void reserve_host_memory();
 
@@ -32,6 +32,8 @@ namespace neural_network
       Neurons(Dim dim);
 
       void reserve_memory();
+
+      void reserve_memory(Dim dim);
 
       void memcpy_host_to_device();
 
