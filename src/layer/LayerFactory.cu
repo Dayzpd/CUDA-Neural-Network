@@ -1,6 +1,6 @@
 
 #include "LayerFactory.h"
-#include "Sigmoid.h"
+#include "Softmax.h"
 #include "ReLU.h"
 #include "FullyConnected.h"
 #include "Normalize.h"
@@ -25,8 +25,8 @@ namespace neural_network
   {
     switch (activation_type)
     {
-      case SIGMOID:
-        return std::make_unique<Sigmoid>();
+      case SOFTMAX:
+        return std::make_unique<Softmax>();
       case RELU:
         return std::make_unique<ReLU>();
     }

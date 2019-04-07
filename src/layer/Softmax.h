@@ -1,22 +1,24 @@
 
-#ifndef SIGMOID_H
-#define SIGMOID_H
+#ifndef SOFTMAX_H
+#define SOFTMAX_H
 
 #include "Layer.h"
 #include "../neurons/Neurons.h"
 
 namespace neural_network {
 
-  class Sigmoid : public Layer
+  class Softmax : public Layer
   {
     private:
       Neurons input;
       Neurons output;
 
-    public:
-      Sigmoid();
+      
 
-      ~Sigmoid();
+    public:
+      Softmax();
+
+      ~Softmax();
 
       Neurons& forward_prop(Neurons& input);
 

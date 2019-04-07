@@ -1,4 +1,4 @@
-#include "Sigmoid.h"
+#include "Softmax.h"
 
 #include <math.h>
 
@@ -13,29 +13,34 @@ namespace neural_network {
   }
 
   __global__
-  void device_forward_prop_sigmoid(float* input, float* output
-    size_t input_size
-  ) {
+  void device_softmax(float* input, float* output, size_t input_size)
+  {
     int t_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Each thread calculates one weights sum + bias.
-    if (t_id < input_size && input[t_id] < 0)
+    /*if (t_id < input_size && input[t_id] < 0)
     {
       output[t_id] = sigmoid(input[t_id]);
-    }
+    }*/
+    /*
+    1. find max value: max = max(input)
+    2. input_modified[i] = expf(input[i] - max)
+    3. find sum of modified input vals: sum = sum(input_modified)
+    4. output[x] = input_modified[x] / sum 
+    */
   }
 
-  Sigmoid::Sigmoid()
+  Softmax::Softmax()
   {
 
   }
 
-  Sigmoid::~Sigmoid()
+  Softmax::~Softmax()
   {
 
   }
 
-  Neurons& Sigmoid::forward_prop(Neurons& input)
+  Neurons& Softmax::forward_prop(Neurons& input)
   {
     this->input = input;
     ouput.reserve_memory(input.dim);
@@ -50,7 +55,7 @@ namespace neural_network {
     return output;
   }
 
-  Neurons& Sigmoid::back_prop(Neurons& input, float learning_rate)
+  Neurons& Softmax::back_prop(Neurons& input, float learning_rate)
   {
 
   }

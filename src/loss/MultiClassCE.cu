@@ -15,6 +15,18 @@ namespace neural_network
 
     if (t_id < actual_size)
     {
+      atomicAdd(loss, -y[t_id] * __logf(p[t_id]));
+    }
+  }
+
+  __global__
+  void device_multi_class_ce_deriv(float* p, float* y, size_t actual_size,
+    float* loss
+  ) {
+    int t_id = blockId.x * blockDim.x + threadIdx.x;
+
+    if (t_id < actual_size)
+    {
       atomicAdd(loss, -y * __logf(p));
     }
   }

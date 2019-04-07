@@ -72,6 +72,7 @@ void Network::train()
   {
     output = forward_propagate(get<0>(feature));
     back_propagate(output, get<1>feature);
+    float loss = this->loss_func->calculate(output, get<1>feature);
   }
 }
 
@@ -90,7 +91,7 @@ void back_propagate(Neurons& prediction, Neurons& actual)
 {
 
   //TO DO: calculate loss
-  Neurons err = this->loss_func->calculate(prediction, actual);
+  Neurons err = this->loss_func->calculate_deriv(prediction, actual);
 
   for (std::vector<int>::reverse_iterator i = layers.rbegin();
     i != layers.rend(); i++)

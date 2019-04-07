@@ -15,7 +15,7 @@ namespace neural_network
 
     public:
       enum Activation {
-        SIGMOID = "SIGMOID",
+        SOFTMAX = "SOFTMAX",
         RELU = "RELU"
       };
 
