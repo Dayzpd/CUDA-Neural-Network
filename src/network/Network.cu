@@ -4,8 +4,8 @@
 #include "Network.h"
 
 
-Network::Network(float learning_rate, std::string loss_type,
-  std::string optimize_type) : learning_rate(learning_rate)
+Network::Network(std::string loss_type, std::string optimize_type) :
+  num_batches(0)
 {
   this->layer_factory = LayerFactory::get_instance();
   this->loss_func = LossFactory::get_instance()->create(loss_type);
@@ -25,14 +25,11 @@ Network::~Network()
   }
 }
 
-void add_class(int class_num, std::string class_name)
+void Network::add_batch(Neurons features, Neurons classes)
 {
-  this->classes[class_num] = class_name;
-}
-
-void Network::add_feature(Neurons feature, Neurons class)
-{
-  features.push_back(make_tuple(feature, class));
+  batches.push_back(features);
+  actuals.push_back(classes);
+  num_batches += 1;
 }
 
 void Network::add_layer(std::string layer_type)
@@ -42,7 +39,8 @@ void Network::add_layer(std::string layer_type)
 
 void Network::add_layer(std::string layer_type, size_t x, size_t y)
 {
-  this->layers.push_back(this->layer_factory->create(layer_type, Dim(x, y)));
+  this->layers.push_back(this->layer_factory->create(layer_type,
+    Dim(x, y, this->batch_size)));
 }
 
 std::string classify(Neurons& prediction)
@@ -66,13 +64,22 @@ int Network::get_num_classes()
   return this->classes.size();
 }
 
-void Network::train()
+void Network::train(int num_epochs, float learning_rate, int checkpt = 100)
 {
-  for (auto feature : features)
+  for (int e = 0; e < num_epochs; e++)
   {
-    output = forward_propagate(get<0>(feature));
-    back_propagate(output, get<1>feature);
-    float loss = this->loss_func->calculate(output, get<1>feature);
+    float loss = 0.0;
+    for (int b = 0; b < num_batches; b++)
+    {
+      output = forward_propagate(batches.at(b));
+      back_propagate(output, batches.at(b), learning_rate);
+      float loss += this->loss_func->calculate(output, actuals.at(b));
+    }
+
+    if (e % checkpt == 0)
+    {
+      printf("Epoch: %d, Cost: %f", e, loss / num_batches);
+    }
   }
 }
 

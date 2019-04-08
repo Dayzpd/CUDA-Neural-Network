@@ -11,10 +11,11 @@ namespace neural_network {
   class FullyConnected : public Layer
   {
     private:
+      Neurons input;
       Neurons weights;
       Neurons biases;
-      Neurons layer_ouput;
-      Neurons optimized;
+      Neurons output;
+      Neurons input_deriv;
 
     public:
       FullyConnected(Dim dim, std::string act_type);
@@ -30,10 +31,6 @@ namespace neural_network {
       void init_weights();
 
       void init_biases();
-
-      void init_layer_ouput();
-
-      void init_optimized();
   }
 
 }

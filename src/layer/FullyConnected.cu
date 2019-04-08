@@ -5,28 +5,36 @@
 #include <math.h>
 #include <random>
 
+#define BLOCK_DIM_SIZE 16
 #define BLOCK_SIZE 256
 
 namespace neural_network {
 
   __global__
-  void device_forward_prop_fc(float* weights, float* biases, float* layer_input,
-    float* layout_ouput, size_t weights_x, size_t weights_y
+  void device_forward_prop_fc(float* input, float* weights, float* biases,
+    float* output, size_t input_x, size_t weights_x, size_t weights_y
   ) {
-    int t_id = blockIdx.x * blockDim.x + threadIdx.x;
+    // x_id used to access input values
+    int x_id = blockIdx.x * blockDim.x + threadIdx.x;
+    // y_id used to access weight values
+    int y_id = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Each thread calculates one weights sum + bias.
-    if (t_id < weights_y)
+    // (x_id, y_id) refer to the (row, col) of the output
+    if (x_id < input_x && y_id < weights_y)
     {
-      float output = 0;
+      // t_id used to assign output values
+      int t_id = x_id + input.dim.x * y_id;
 
-      // sum(input[i] * weight[i]) + bias[i]
-      for (int index = 0; index < weights_x; index++)
+      float output_val = 0;
+
+      // output = sum(inputs * weights) + bias
+      for (int i = 0; i < weights_x; i++)
       {
-        output += weights[t_id * weights_x + index] * layer_input[index];
+        output_val +=
+          input[x_id + (i * input_x)] * weights[i + (y_id * weights_x)];
       }
 
-      layer_output[t_id] = output + biases[t_id];
+      output[t_id] = output_val + biases[y_id];
     }
   }
 
@@ -72,36 +80,21 @@ namespace neural_network {
     biases.memcpy_host_to_device();
   }
 
-  void FullyConnected::init_layer_ouput()
-  {
-    for (size_t y = 0; y < layer_ouput.dim.y; x++)
-    {
-      layer_ouput[y] = 0;
-    }
-
-    layer_ouput.memcpy_host_to_device();
-  }
-
-  void FullyConnected::init_optimized()
-  {
-    for (size_t x = 0; x < weights.dim.x; x++)
-    {
-      optimized[x] = 0;
-    }
-
-    optimized.memcpy_host_to_device();
-  }
-
   Neurons& FullyConnected::forward_prop(Neurons& input)
   {
-    // In order to multiply two matrices in a Fully Connected layer, weights
-    // x dim, must equal the input x dim * y dim.
-    assert((input.dim.x * input.dim.y) == weights.dim.x);
+    assert(input.dim.y == weights.dim.x);
 
-    device_forward_prop_fc<<<ceil(weights.dim.x / BLOCK_SIZE), BLOCK_SIZE>>>(
-      weights.device_neurons.get(), biases.device_neurons.get(),
-      layer_input.device_neurons.get(), layout_ouput.device_neurons.get(),
-      weights.dim.x, weights.dim.y)
+    this->input = input;
+    this->output.reserve_memory(Dim(input.dim.x, weights.dim.y));
+
+    // 1D grid of 2D blocks
+    dim3 block_size(BLOCK_DIM_SIZE, BLOCK_DIM_SIZE);
+    dim3 num_blocks(ceil(input.dim.x * weights.dim.y / (BLOCK_SIZE)));
+
+    device_forward_prop_fc<<<ceil(num_blocks, block_size>>>(
+      input.device_neurons.get(), weights.device_neurons.get(),
+      biases.device_neurons.get(), output.device_neurons.get(),
+      input.dim.x, weights.dim.x, weights.dim.y);
 
     return layer_ouput;
   }

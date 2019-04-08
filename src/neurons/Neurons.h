@@ -27,7 +27,7 @@ namespace neural_network
 
       ~Neurons();
 
-      Neurons(size_t x = 1, size_t y = 1);
+      Neurons(size_t x = 1, size_t y = 1, size_t z = 1);
 
       Neurons(Dim dim);
 
