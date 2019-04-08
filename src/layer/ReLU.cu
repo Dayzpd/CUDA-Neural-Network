@@ -11,17 +11,9 @@ namespace neural_network {
   {
     int t_id = blockIdx.x * blockDim.x + threadIdx.x;
 
-    // Each thread calculates one weights sum + bias.
     if (t_id < input_size)
     {
-      if (input[t_id] < 0)
-      {
-        output[t_id] = 0;
-      }
-      else
-      {
-        output[t_id] = input[t_id];
-      }
+      output[t_id] = fmaxf(input[t_id], 0);
     }
   }
 
@@ -40,10 +32,13 @@ namespace neural_network {
     this->input = input;
     output.reserve_memory(input.dim);
 
-    size_t input_size = input.dim.x * input.dim.y;
-    int grid_size = ceil(input_size / BLOCK_SIZE);
+    int input_size = input.dim.x * input.dim.y;
 
-    device_forward_prop_relu<<<grid_size, BLOCK_SIZE>>>(
+    // 1D grid of 1D blocks
+    dim3 block_size(BLOCK_SIZE);
+    dim3 num_blocks(ceil(input_size / BLOCK_SIZE));
+
+    device_forward_prop_relu<<<num_blocks, block_size>>>(
       input.device_neurons.get(), output.device_neurons.get(), input_size
     );
 

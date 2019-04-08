@@ -96,7 +96,7 @@ namespace neural_network {
       biases.device_neurons.get(), output.device_neurons.get(),
       input.dim.x, weights.dim.x, weights.dim.y);
 
-    return layer_ouput;
+    return output;
   }
 
   Neurons& FullyConnected::back_prop(Neurons& input, float learning_rate)
