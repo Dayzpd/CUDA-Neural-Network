@@ -15,18 +15,16 @@ namespace neural_network {
       Neurons weights;
       Neurons biases;
       Neurons output;
-      Neurons input_deriv;
+      Neurons backprop_deriv;
 
     public:
-      FullyConnected(Dim dim, std::string act_type);
+      FullyConnected(Dim dim);
 
       ~FullyConnected();
 
       Neurons& forward_prop(Neurons& input);
 
       Neurons& back_prop(Neurons& input, float learning_rate);
-
-      void initialize_neurons();
 
       void init_weights();
 

@@ -14,6 +14,7 @@ namespace neural_network
   class Neurons
   {
     public:
+      bool allocated;
       Dim dim;
 
       thrust::host_vector<float> host_data;
@@ -21,15 +22,21 @@ namespace neural_network
 
       ~Neurons();
 
-      Neurons(size_t x = 1, size_t y = 1, size_t z = 1);
+      Neurons();
+
+      Neurons(size_t x = 1, size_t y = 1);
 
       Neurons(Dim dim);
+
+      void allocate_memory();
+
+      void allocate_memory(Dim dim);
 
       void memcpy_host_to_device();
 
       void memcpy_device_to_host();
 
-      float* get_device_neurons();
+      float* get_device_pointer();
   }
 
 }
