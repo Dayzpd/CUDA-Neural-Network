@@ -12,7 +12,7 @@ namespace neural_network {
     private:
       Neurons input;
       Neurons output;
-      Neurons input_deriv;
+      Neurons backprop_deriv;
 
     public:
       ReLU();

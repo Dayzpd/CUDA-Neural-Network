@@ -17,7 +17,7 @@ namespace neural_network {
     }
   }
 
-  ReLU::ReLU()
+  ReLU::ReLU() : output()
   {
 
   }
@@ -30,7 +30,7 @@ namespace neural_network {
   Neurons& ReLU::forward_prop(Neurons& input)
   {
     this->input = input;
-    output.reserve_memory(input.dim);
+    output.allocate_memory(input.dim);
 
     int input_size = input.dim.x * input.dim.y;
 
@@ -39,7 +39,7 @@ namespace neural_network {
     dim3 num_blocks(ceil(input_size / BLOCK_SIZE));
 
     device_forward_prop_relu<<<num_blocks, block_size>>>(
-      input.device_neurons.get(), output.device_neurons.get(), input_size
+      input.get_device_pointer(), output.get_device_pointer(), input_size
     );
 
     return output;
