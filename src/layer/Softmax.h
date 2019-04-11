@@ -13,8 +13,6 @@ namespace neural_network {
       Neurons input;
       Neurons output;
 
-      
-
     public:
       Softmax();
 

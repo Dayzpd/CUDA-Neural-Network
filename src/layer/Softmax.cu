@@ -1,33 +1,52 @@
 #include "Softmax.h"
 
 #include <math.h>
+#include <thrust/device_ptr.h>
+#include <thrust/device_vector.h>
+#include <thrust/execution_policy.h>
+#include <thrust/for_each.h>
+#include <thrust/functional.h>
 
-#define BLOCK_SIZE 256
+#define DIM_SIZE 32
+#define BLOCK_SIZE 1024
 
 namespace neural_network {
 
-  __device__
-  float sigmoid(float x)
-  {
-    return 1.0f / (1 + expf(x));
+  __global__
+  void device_row_max_values(float* input, float* max_vals, size_t input_x,
+    size_t input_y
+  ) {
+    int row_id = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row_id < input_x)
+    {
+      for (size_t col = 0; col < input_y; col++)
+      {
+        if (max_vals[row_id] < input[row_id * input_y + col])
+        {
+          max_vals[row_id] = input[row_id * input_y + col];
+        }
+      }
+    }
   }
 
   __global__
-  void device_softmax(float* input, float* output, size_t input_size)
-  {
-    int t_id = blockIdx.x * blockDim.x + threadIdx.x;
+  void device_softmax(float* input, float* max_vals, float* row_sums,
+    float* output, size_t input_x, size_t input_y
+  ) {
+    int x_id = blockIdx.x * blockDim.x + threadIdx.x;
+    int y_id = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Each thread calculates one weights sum + bias.
-    /*if (t_id < input_size && input[t_id] < 0)
+    if (x_id < input_x && y_id < input_y)
     {
-      output[t_id] = sigmoid(input[t_id]);
-    }*/
-    /*
-    1. find max value: max = max(input)
-    2. input_modified[i] = expf(input[i] - max)
-    3. find sum of modified input vals: sum = sum(input_modified)
-    4. output[x] = input_modified[x] / sum 
-    */
+      int t_id = x_id * input_y + y_id;
+
+      output[t_id] = expf(input[t_id] - max_vals[x_id]);
+      atomicAdd(&row_sums[x_id], output[tid]);
+      __syncthreads();
+
+      output[t_id] = output[t_id] / row_sums[x_id]
+    }
   }
 
   Softmax::Softmax()
@@ -43,14 +62,32 @@ namespace neural_network {
   Neurons& Softmax::forward_prop(Neurons& input)
   {
     this->input = input;
-    ouput.reserve_memory(input.dim);
+    output.allocate_memory(input.dim);
 
-    size_t input_size = input.dim.x * input.dim.y;
-    int grid_size = ceil(input_size / BLOCK_SIZE);
+    float* row_max = nullptr;
+    cudaMalloc((void**)&row_max, input.dim.x * sizeof(float));
+    cudaMemset(row_max, -1.0f, input.dim.x * sizeof(float));
 
-    device_forward_prop_relu<<<grid_size, BLOCK_SIZE>>>(
-      input.device_neurons.get(), output.device_neurons.get() input_size
-    );
+    float* row_sums = nullptr;
+    cudaMalloc((void**)&row_sums, input.dim.x * sizeof(float));
+    cudaMemset(row_sums, 0, input.dim.x * sizeof(float));
+
+    dim3 block_size(BLOCK_SIZE);
+    dim3 grid_size(ceil(input.dim.x / BLOCK_SIZE));
+
+    device_max_row_values<<<grid_size, block_size>>>(input.get_device_pointer(),
+      &row_max[0], input.dim.x, input.dim.y);
+
+    dim3 block_size(DIM_SIZE, DIM_SIZE - (DIM_SIZE % input.dim.y));
+    dim3 grid_size(ceil((input.dim.x * input.dim.y)
+      / (block_size.x * block_size.y)));
+
+    device_softmax<<<grid_size, block_size>>>(input.get_device_pointer(),
+      &row_max[0], &row_sums[0], output.get_device_pointer(), input.dim.x,
+      input.dim.y);
+
+    cudaFree(row_max);
+    cudaFree(row_sums);
 
     return output;
   }
