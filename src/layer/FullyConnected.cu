@@ -5,7 +5,7 @@
 #include <math.h>
 #include <random>
 
-#define BLOCK_DIM_SIZE 16
+#define DIM_SIZE 16
 #define BLOCK_SIZE 256
 
 namespace neural_network {
@@ -77,7 +77,7 @@ namespace neural_network {
     this->output.allocate_memory(Dim(input.dim.x, weights.dim.y));
 
     // 1D grid of 2D blocks
-    dim3 block_size(BLOCK_DIM_SIZE, BLOCK_DIM_SIZE);
+    dim3 block_size(DIM_SIZE, DIM_SIZE);
     dim3 num_blocks(ceil(input.dim.x * weights.dim.y / (BLOCK_SIZE)));
 
     device_forward_prop_fc<<<ceil(num_blocks, block_size>>>(
