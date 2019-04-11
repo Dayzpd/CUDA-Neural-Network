@@ -7,6 +7,7 @@
 #include <memory>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+#include <thrust/device_ptr.h>
 
 namespace neural_network
 {
