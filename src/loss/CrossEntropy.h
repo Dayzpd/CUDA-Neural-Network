@@ -12,7 +12,7 @@ namespace neural_network
     public:
       float calculate(Neurons& prediction, Neurons& actual);
 
-      float calculate_deriv(Neurons& prediction, Neurons& actual);
+      Neurons calculate_deriv(Neurons& prediction, Neurons& actual, );
   }
 
 }
