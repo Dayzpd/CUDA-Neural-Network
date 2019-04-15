@@ -5,7 +5,7 @@
 
 
 Network::Network(std::string loss_type, std::string optimize_type) :
-  num_batches(0)
+  num_batches(0), prob(), prob_delta()
 {
   this->layer_factory = LayerFactory::get_instance();
   this->loss_func = LossFactory::get_instance()->create(loss_type);
@@ -40,7 +40,7 @@ void Network::add_layer(std::string layer_type)
 void Network::add_layer(std::string layer_type, size_t x, size_t y)
 {
   this->layers.push_back(this->layer_factory->create(layer_type,
-    Dim(x, y, this->batch_size)));
+    Dim(x, y)));
 }
 
 std::string classify(Neurons& prediction)
@@ -71,9 +71,9 @@ void Network::train(int num_epochs, float learning_rate, int checkpt = 100)
     float loss = 0.0;
     for (int b = 0; b < num_batches; b++)
     {
-      output = forward_propagate(batches.at(b));
-      back_propagate(output, batches.at(b), learning_rate);
-      float loss += this->loss_func->calculate(output, actuals.at(b));
+      prob = forward_propagate(batches.at(b));
+      back_propagate(prob, batches.at(b), learning_rate);
+      float loss += this->loss_func.calculate(output, actuals.at(b));
     }
 
     if (e % checkpt == 0)
@@ -83,22 +83,24 @@ void Network::train(int num_epochs, float learning_rate, int checkpt = 100)
   }
 }
 
-Neurons& forward_propagate(Neurons& feature)
+Neurons forward_propagate(Neurons& feature)
 {
-  Neurons layer_output = feature;
+  Neurons output = feature;
   for (auto layer : layers)
   {
-    layer_output = layer->forward_prop(layer_output);
+    output = layer->forward_prop(layer_output);
   }
 
-  return layer_output;
+  prob = output;
+
+  return prob;
 }
 
-void back_propagate(Neurons& prediction, Neurons& actual)
+void back_propagate(Neurons& prob, Neurons& actual)
 {
+  prob_delta.allocate_memory(prob.dim);
 
-  //TO DO: calculate loss
-  Neurons err = this->loss_func->calculate_deriv(prediction, actual);
+  Neurons err = this->loss_func->calculate_deriv(prob, actual, prob_delta);
 
   for (std::vector<int>::reverse_iterator i = layers.rbegin();
     i != layers.rend(); i++)

@@ -33,6 +33,8 @@ namespace neural_network
 
       void allocate_memory(Dim dim);
 
+      void allocate_memory(size_t x, size_t y);
+
       void memcpy_host_to_device();
 
       void memcpy_device_to_host();

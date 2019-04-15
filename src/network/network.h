@@ -21,6 +21,9 @@ namespace neural_network
 
       std::vector<Layer*> layers;
 
+      Neurons prob;
+      Neurons prob_delta;
+
       std::vector<Neurons> batches;
       std::vector<Neurons> actuals;
 

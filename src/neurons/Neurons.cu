@@ -42,6 +42,11 @@ namespace neural_network
     }
   }
 
+  void allocate_memory(size_t x, size_t y) : allocate_memory(Dim(x, y))
+  {
+
+  }
+
   void Neurons::memcpy_host_to_device()
   {
     this->device = this->host;
