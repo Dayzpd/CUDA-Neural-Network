@@ -12,6 +12,7 @@ namespace neural_network {
     private:
       Neurons input;
       Neurons output;
+      Neurons delta;
 
     public:
       Softmax();
