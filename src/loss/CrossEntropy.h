@@ -1,13 +1,13 @@
 
-#ifndef MULTI_CLASS_CE_H
-#define MULTI_CLASS_CE_H
+#ifndef CROSS_ENTROPY_H
+#define CROSS_ENTROPY_H
 
 #include "LossFunction.h"
 
 namespace neural_network
 {
 
-  class MultiClassCE
+  class CrossEntropy
   {
     public:
       float calculate(Neurons& prediction, Neurons& actual);
