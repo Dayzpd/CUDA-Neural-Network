@@ -13,9 +13,9 @@ namespace neural_network
   ) {
     int t_id = blockId.x * blockDim.x + threadIdx.x;
 
-    if (t_id < actual_size)
+    if (t_id < actual_size && y[t_id] == 1)
     {
-      atomicAdd(&loss, -y[t_id] * __logf(p[t_id]));
+      atomicSub(&loss, __logf(p[t_id]));
     }
   }
 
@@ -27,21 +27,14 @@ namespace neural_network
 
     if (t_id < actual_size)
     {
-      if (y[t_id] == 1)
-      {
-        p_delta[t_id] = p[t_id] - 1;
-      }
-      else
-      {
-        p_delta[t_id] = p[t_id];
-      }
+      p_delta[t_id] = -(y[t_id] / p[t_id]);
     }
   }
 
   float CrossEntropy::calculate(Neurons& prob, Neurons& actual)
   {
-    assert(prediction.dim.x == actual.dim.x);
-    assert(prediction.dim.y == actual.dim.y);
+    assert(prob.dim.x == actual.dim.x);
+    assert(prob.dim.y == actual.dim.y);
 
     size_t actual_size = actual.dim.x * actual.dim.y;
 
@@ -61,14 +54,14 @@ namespace neural_network
     float loss_result = *loss;
     cudaFree(loss);
 
-    return loss_result;
+    return loss_result / prob.dim.x; // returns mean of loss for the batch
   }
 
   Neurons CrossEntropy::calculate_deriv(Neurons& prob, Neurons& actual,
     Neurons& prob_delta
   ) {
-    assert(prediction.dim.x == actual.dim.x);
-    assert(prediction.dim.y == actual.dim.y);
+    assert(prob.dim.x == actual.dim.x);
+    assert(prob.dim.y == actual.dim.y);
 
     size_t actual_size = actual.dim.x * actual.dim.y;
 
