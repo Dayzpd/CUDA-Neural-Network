@@ -51,27 +51,41 @@ namespace neural_network {
   }
 
   __global__
-  void device_softmax_deriv(float* softmax, float* delta, size_t delta_x,
-    size_t delta_y_sqrt, size_t delta_y
+  void device_softmax_jacobian(float* softmax, float* jacobian,
+    size_t softmax_x, size_t softmax_y, size_t jacobian_y
   ) {
-    int x_id = blockIdx.x * blockDim.x + threadIdx.x; // x_id: feature row
-    int y_id = blockIdx.y * blockDim.y + threadIdx.y; // y_id: i (jacobian)
-    int z_id = blockIdx.z * blockDim.z + threadIdx.z; // z_id: j (jacobian)
+    int row = blockIdx.x * blockDim.x + threadIdx.x; // x_id: feature row
+    int i = blockIdx.y * blockDim.y + threadIdx.y; // y_id: i offset
+    int j = blockIdx.z * blockDim.z + threadIdx.z; // z_id: j offset
 
-    if (x_id < delta_x && y_id < delta_y_sqrt && z_id < delta_y_sqrt)
+    if (row < softmax_x && i < softmax_y && j < softmax_y)
     {
-      int delta_ind = x_id * delta_y + y_id * delta_y_sqrt + z_id;
-      if (y_id == z_id)
+      int j_ind = row * jacobian_y + i * softmax_y + j; // jacobian index
+      int s_ind = row * softmax_y; // softmax offset
+      int kronecker = (i == j) ? 1.0f : 0.0f;
+
+      jacobian[j_ind] = softmax[s_ind + i] * (kronecker - softmax[s_ind + j]);
+    }
+  }
+
+  __global__
+  void device_softmax_error(float* error, float* jacobian, float* delta
+    size_t softmax_x, size_t softmax_y, size_t jacobian_y
+  ) {
+    int x_id = blockIdx.x * blockDim.x + threadIdx.x; // x_id: row #
+    int y_id = blockIdx.y * blockDim.y + threadIdx.y; // y_id: col #
+
+    if (x_id < softmax_x && y_id < softmax_y)
+    {
+      int delta_val = 0.0f;
+      int err_off = x_id * softmax_y; // error offset
+      int jacob_off = x_id * jacobian_y + y_id * softmax_y; // jacobian offset
+      for (size_t i = 0; i < softmax_y; i++)
       {
-        int softmax_ind = x_id * delta_y_sqrt + y_id;
-        delta[delta_ind] = softmax[softmax_ind] * (1 - softmax[softmax_ind]);
+        delta_val += error[err_off + i] * jacobian[jacob_off + i];
       }
-      else
-      {
-        int softmax_i = x_id * delta_y_sqrt + y_id;
-        int softmax_j = x_id * delta_y_sqrt + z_id;
-        delta[delta_ind] = -softmax[softmax_i] * softmax[softmax_j];
-      }
+
+      delta[x_id * softmax_y + y_id] = delta_val;
     }
   }
 
@@ -120,14 +134,30 @@ namespace neural_network {
 
   Neurons& Softmax::back_prop(Neurons& error, float learning_rate)
   {
-    delta.allocate_memory(output.dim.x, output.dim.y * output.dim.y);
+    delta.allocate_memory(output.dim);
+
+    float* jacobian = nullptr;
+    cudaMalloc((void**)&jacobian,
+      output.dim.x * output.dim.y * output.dim.y * sizeof(float));
+    cudaMemset(jacobian, 0,
+      output.dim.x * output.dim.y * output.dim.y * sizeof(float));
 
     dim3 block_size(DIM_SIZE_3D, DIM_SIZE_3D, DIM_SIZE_3D);
     dim3 grid_size(ceil((delta.dim.x * delta.dim.y)
       / (block_size.x * block_size.y * block_size.z)));
 
-    device_softmax_deriv<<<grid_size, block_size>>>(input.get_device_pointer(),
-      delta.get_device_pointer(), delta.dim.x, output.dim.y, delta.dim.y);
+    device_softmax_jacobian<<<grid_size, block_size>>>(
+      output.get_device_pointer(), &jacobian[0], output.dim.x, output.dim.y,
+      output.dim.y * output.dim.y);
+
+    dim3 block_size(DIM_SIZE_2D, DIM_SIZE_2D);
+    dim3 grid_size(ceil((delta.dim.x * delta.dim.y) / BLOCK_SIZE));
+
+    device_softmax_error<<<grid_size, block_size>>>(
+      error.get_device_pointer(), &jacobian[0], delta.get_device_pointer(),
+      output.dim.x, output.dim.y, output.dim.y * output.dim.y);
+
+    cudaFree(jacobian);
 
     return delta;
   }
