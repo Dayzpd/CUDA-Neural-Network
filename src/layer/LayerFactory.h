@@ -20,9 +20,7 @@ namespace neural_network
       };
 
       enum Connection {
-        FULLY_CONNECTED = "FULLY_CONNECTED",
-        NORMALIZE = "NORMALIZE",
-        NORMALIZE_IMG = "NORMALIZE_IMG"
+        FULLY_CONNECTED = "FULLY_CONNECTED"
       };
 
       static ActivationFactory& get_instance();
