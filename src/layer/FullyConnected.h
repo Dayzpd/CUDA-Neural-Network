@@ -15,20 +15,26 @@ namespace neural_network {
       Neurons weights;
       Neurons biases;
       Neurons output;
-      Neurons backprop_deriv;
+      Neurons delta;
 
     public:
       FullyConnected(Dim dim);
 
       ~FullyConnected();
 
-      Neurons& forward_prop(Neurons& input);
-
-      Neurons& back_prop(Neurons& input, float learning_rate);
-
       void init_weights();
 
       void init_biases();
+
+      Neurons& forward_prop(Neurons& input);
+
+      Neurons& back_prop(Neurons& error, float learning_rate);
+
+      void backprop_error(Neurons& error);
+
+      void update_weights(Neurons& error, float learning_rate);
+
+      void update_bias(Neurons& error, float learning_rate);
   }
 
 }
