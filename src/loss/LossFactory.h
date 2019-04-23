@@ -14,10 +14,7 @@ namespace neural_network
 
     public:
       enum Type {
-        BINARY_CROSS_ENTROPY = "BINARY_CROSS_ENTROPY",
-        HINGE = "HINGE",
-        MEAN_SQUARED_ERROR = "MEAN_SQUARED_ERROR",
-        MULTI_CLASS_CROSS_ENTROPY = "MULTI_CLASS_CROSS_ENTROPY"
+        CROSS_ENTROPY = "CROSS_ENTROPY"
       };
 
       static LossFactory& get_instance();
