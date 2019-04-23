@@ -1,11 +1,6 @@
 #include "Softmax.h"
 
 #include <math.h>
-#include <thrust/device_ptr.h>
-#include <thrust/device_vector.h>
-#include <thrust/execution_policy.h>
-#include <thrust/for_each.h>
-#include <thrust/functional.h>
 
 #define DIM_SIZE_2D 32
 #define DIM_SIZE_3D 8
