@@ -1,7 +1,8 @@
 
-#ifndef MINI_BATCH_H
-#define MINI_BATCH_H
+#ifndef DATASET_H
+#define DATASET_H
 
+#include "DatasetConfig.h"
 #include "../neurons/Neurons.h"
 
 #include <map>
@@ -14,6 +15,8 @@ namespace neural_network
   class Dataset
   {
     private:
+      DatasetConfig& config;
+
       std::vector<std::string> classes; // uses index to access class name
 
       std::vector<Neurons> test_features; // features to test network
@@ -24,30 +27,34 @@ namespace neural_network
 
       /// <summary><c>allocate_test_features</c> allocates memory for features
       /// used to test a neural network after it has been trained.</summary>
-      /// <param name="num_classes">Number of class object types.</param>
-      /// <param name="num_test_features">Number of features used to test the
-      /// neural network.</param>
-      /// <param name="feature_size">Size of each feature (e.g. a 28 x 28 image
-      /// has a feature size of 784).</param>
-      void allocate_test_features(int num_classes, int num_test_features,
-        int feature_size);
+      void allocate_test_features();
 
       /// <summary><c>allocate_train_features</c> allocates memory for features
       /// used to train a neural network.</summary>
-      /// <param name="num_classes">Number of class object types.</param>
-      /// <param name="num_train_features">Number of features used to train the
-      /// neural network.</param>
-      /// <param name="feature_size">Size of each feature (e.g. a 28 x 28 image
-      /// has a feature size of 784).</param>
-      /// <param name="num_batches">Number of training batches (e.g.
-      /// <c>ceil(num_train_features / batch_size)</c>).</param>
-      /// <param name="batch_size">Number of features in each batch.</param>
-      void allocate_train_features(int num_classes, int num_train_features,
-        int feature_size, int num_batches, int batch_size);
+      void allocate_train_features();
+
+      /// <summary><c>load_batches</c> loads train features into the
+      /// <c>train_batches</c> vector along with each feature's target one hot
+      /// encoded into the <c>train_targets</c> vector.</summary>
+      /// <param name="batches_path">Absolute path to batch CSV file directory.
+      /// </param>
+      void load_batches(std::string batches_path);
+
+      /// <summary><c>load_test</c> loads test features into the
+      /// <c>test_features</c> vector along with each feature's target one hot
+      /// encoded into the <c>test_targets</c> vector.</summary>
+      /// <param name="test_set_path">Absolute path to test features CSV file.
+      /// </param>
+      void load_test(std::string test_set_path);
+
+      /// <summary><c>register_classes</c> loads object labels into the
+      /// <c>classes</c> vector.</summary>
+      /// <param name="objects_path">Absolute path to object labels CSV
+      /// file.</param>
+      void register_classes(std::string objects_path);
 
     public:
-      Dataset(int batch_size, int num_classes, int feature_size,
-        int num_test_features, int num_train_features);
+      Dataset(DatasetConfig& config);
 
       ~Dataset();
 
@@ -57,10 +64,10 @@ namespace neural_network
       /// one_hot_vector: [ 0, 0, 1, 0, 0 ]
       /// class_index: 2
       /// </example>
-      /// <param name="one_hot_vector">One hot vector representing a
+      /// <param name="one_hot">One hot vector representing a
       /// pre-registered class object.</param>
       /// <returns>Class index represented by the one hot vector.</returns>
-      int decode_one_hot(std::vector one_hot_vector);
+      int decode_one_hot(std::vector one_hot);
 
       /// <summary><c>encode_one_hot</c> receives a class index and returns its
       /// equivalent as a one hot vector.</summary>
@@ -72,6 +79,30 @@ namespace neural_network
       /// </param>
       /// <returns>One hot encoded vector of supplied class index.</returns>
       std::vector<int> encode_one_hot(int class_index);
+
+      /// <summary><c>get_batch</c> returns a single requested batch.</summary>
+      /// <param name="batch_num">Batch number requested.</param>
+      /// <returns>Neurons object for the requested batch.</returns>
+      Neurons& get_batch(int batch_num);
+
+      /// <summary><c>get_batch_targets</c> returns the one hot encoded targets
+      /// for the requested batch.</summary>
+      /// <param name="batch_num">Batch number requested.</param>
+      /// <returns>Neurons object for the requested batch targets.</returns>
+      Neurons& get_batch_targets(int batch_num);
+
+      /// <summary><c>get_test_feature</c> returns a single test feature.
+      /// </summary>
+      /// <param name="feature_num">Test feature number requested.</param>
+      /// <returns>Neurons object for the requested test feature.</returns>
+      Neurons& get_test_feature(int feature_num);
+
+      /// <summary><c>get_test_feature</c> returns the one hot encoded target
+      /// for a single test feature.</summary>
+      /// <param name="feature_num">Test feature number requested.</param>
+      /// <returns>Neurons object for the requested test feature target.
+      /// </returns>
+      Neurons& get_test_target(int feature_num);
 
       /// <summary><c>get_class_index</c> receives a class name and returns its
       /// index.</summary>
@@ -100,55 +131,6 @@ namespace neural_network
       /// in the test set.</summary>
       /// <returns>Number of test features.</returns>
       int get_num_test_features();
-
-      /// <summary><c>load_test</c> loads test features into the
-      /// <c>test_features</c> vector along with each feature's target one hot
-      /// encoded into the <c>test_targets</c> vector.</summary>
-      /// <param name="labels_path">Absolute path to test feature labels CSV
-      /// file. CSV file should be formmated as such:
-      /// <example>
-      /// 0.png,0
-      /// 1.png,0
-      /// 2.png,1
-      /// 3.png,2
-      /// ...
-      /// </example>
-      /// </param>
-      /// <param name="dataset_path">Absolute path to directory containing test
-      /// features.</param>
-      void load_test(std::string labels_path, std::string dataset_path);
-
-      /// <summary><c>load_train</c> loads train features into the
-      /// <c>train_batches</c> vector along with each feature's target one hot
-      /// encoded into the <c>train_targets</c> vector.</summary>
-      /// <param name="labels_path">Absolute path to train feature labels CSV
-      /// file. CSV file should be formmated as such:
-      /// <example>
-      /// 0.png,0
-      /// 1.png,0
-      /// 2.png,1
-      /// 3.png,2
-      /// ...
-      /// </example>
-      /// </param>
-      /// <param name="dataset_path">Absolute path to directory containing train
-      /// features.</param>
-      void load_train(std::string labels_path, std::string dataset_path);
-
-      /// <summary><c>register_classes</c> loads object labels into the
-      /// <c>classes</c> vector.</summary>
-      /// <param name="objects_path">Absolute path to object labels CSV
-      /// file. CSV file should contain lines formatted as such:
-      /// <example>
-      /// bird,0
-      /// deer,1
-      /// person,2
-      /// ...
-      /// </example>
-      /// <remarks> Indexing must start at 0 and subsequent class indexes must
-      /// increment by 1.<remarks>
-      /// </param>
-      void register_classes(std::string objects_path);
   }
 
 }
