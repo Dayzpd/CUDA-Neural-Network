@@ -4,7 +4,9 @@
 
 #include "LossFunction.h"
 
-namespace neural_network
+#include <string>
+
+namespace cuda_net
 {
 
   class LossFactory
@@ -13,14 +15,12 @@ namespace neural_network
       LossFactory() {}
 
     public:
-      enum Type {
-        CROSS_ENTROPY = "CROSS_ENTROPY"
-      };
+      static const std::string CROSS_ENTROPY;
 
       static LossFactory& get_instance();
 
-      static LossFunction& create(Type loss_type);
-  }
+      static LossFunction* create(std::string loss_type);
+  };
 
 }
 

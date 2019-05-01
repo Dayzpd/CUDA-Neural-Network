@@ -6,7 +6,8 @@
 #include "../neurons/Dim.h"
 #include "../neurons/Neurons.h"
 
-namespace neural_network {
+namespace cuda_net
+{
 
   class FullyConnected : public Layer
   {
@@ -35,7 +36,7 @@ namespace neural_network {
       void update_weights(Neurons& error, float learning_rate);
 
       void update_bias(Neurons& error, float learning_rate);
-  }
+  };
 
 }
 

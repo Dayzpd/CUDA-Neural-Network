@@ -5,7 +5,8 @@
 #include "Layer.h"
 #include "../neurons/Neurons.h"
 
-namespace neural_network {
+namespace cuda_net
+{
 
   class Softmax : public Layer
   {
@@ -22,7 +23,7 @@ namespace neural_network {
       Neurons& forward_prop(Neurons& input);
 
       Neurons& back_prop(Neurons& input, float learning_rate);
-  }
+  };
 
 }
 

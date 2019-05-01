@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace neural_network
+namespace cuda_net
 {
 
   class Dataset
@@ -67,7 +67,7 @@ namespace neural_network
       /// <param name="one_hot">One hot vector representing a
       /// pre-registered class object.</param>
       /// <returns>Class index represented by the one hot vector.</returns>
-      int decode_one_hot(std::vector one_hot);
+      int decode_one_hot(std::vector<int> one_hot);
 
       /// <summary><c>encode_one_hot</c> receives a class index and returns its
       /// equivalent as a one hot vector.</summary>
@@ -116,7 +116,7 @@ namespace neural_network
       /// <param name="class_index">Index value for a pre-registered object.
       /// </param>
       /// <returns>Class name of the supplied index.</returns>
-      int get_class_name(int class_index);
+      std::string get_class_name(int class_index);
 
       /// <summary><c>get_num_batches</c> returns number of batches.</summary>
       /// <returns>Number of batches.</returns>
@@ -131,6 +131,8 @@ namespace neural_network
       /// in the test set.</summary>
       /// <returns>Number of test features.</returns>
       int get_num_test_features();
-  }
+  };
 
 }
+
+#endif

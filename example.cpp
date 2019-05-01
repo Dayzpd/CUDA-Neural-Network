@@ -18,6 +18,8 @@ int main()
   network.add_layer("FULLY_CONNECTED", 1000, 10);
   network.add_layer("SOFTMAX");
 
+  float learning_rate = 0.01;
+
   for (int e = 0; e <= 1000; e++)
   {
     float loss = 0.0f;

@@ -8,7 +8,8 @@
 #define DIM_SIZE 32
 #define BLOCK_SIZE 1024
 
-namespace neural_network {
+namespace cuda_net
+{
 
   __global__
   void device_forward_prop_fc(float* input, float* weights, float* biases,
@@ -85,13 +86,13 @@ namespace neural_network {
 
     if (x_id < error_x && y_id < error_y)
     {
-      atomicSub(&biases[y_id],
-        learning_rate * (error[x_id * error_y + y_id] / error_x));
+      atomicAdd(&biases[y_id],
+        - learning_rate * (error[x_id * error_y + y_id] / error_x));
     }
   }
 
   FullyConnected::FullyConnected(Dim dim) : weights(dim.x, dim.y),
-    biases(1, dim.y), output(), backprop_deriv()
+    biases(1, dim.y)
   {
     init_weights();
     init_biases();
@@ -106,7 +107,7 @@ namespace neural_network {
     {
       for (size_t y = 0; y < weights.dim.y; y++)
       {
-        weights.host[x + weights.dim.x * y] = norm(rand);
+        weights.host_data[x + weights.dim.x * y] = norm(rand);
       }
     }
 
@@ -117,7 +118,7 @@ namespace neural_network {
   {
     for (size_t y = 0; y < weights.dim.y; y++)
     {
-      biases.host[y] = 0.01;
+      biases.host_data[y] = 0.01;
     }
 
     biases.memcpy_host_to_device();
@@ -134,7 +135,7 @@ namespace neural_network {
     dim3 block_size(DIM_SIZE, DIM_SIZE);
     dim3 grid_size(ceil((input.dim.x * weights.dim.y) / BLOCK_SIZE));
 
-    device_forward_prop_fc<<<ceil(grid_size, block_size>>>(
+    device_forward_prop_fc<<<grid_size, block_size>>>(
       input.get_device_pointer(), weights.get_device_pointer(),
       biases.get_device_pointer(), output.get_device_pointer(),
       input.dim.x, weights.dim.x, weights.dim.y);

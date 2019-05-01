@@ -5,16 +5,17 @@
 #include "LossFunction.h"
 #include "../neurons/Neurons.H"
 
-namespace neural_network
+namespace cuda_net
 {
 
-  class CrossEntropy
+  class CrossEntropy : public LossFunction
   {
     public:
       float calculate(Neurons& prediction, Neurons& actual);
 
-      Neurons calculate_deriv(Neurons& prediction, Neurons& actual);
-  }
+      Neurons calculate_deriv(Neurons& prediction, Neurons& actual,
+        Neurons& prob_delta);
+  };
 
 }
 

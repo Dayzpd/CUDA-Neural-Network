@@ -4,7 +4,7 @@
 
 #include "../neurons/Neurons.h"
 
-namespace neural_network
+namespace cuda_net
 {
 
   class Layer
@@ -15,7 +15,7 @@ namespace neural_network
       virtual Neurons& forward_prop(Neurons& input) = 0;
 
       virtual Neurons& back_prop(Neurons& input, float learning_rate) = 0;
-  }
+  };
 
 }
 

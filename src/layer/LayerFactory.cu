@@ -3,50 +3,53 @@
 #include "Softmax.h"
 #include "ReLU.h"
 #include "FullyConnected.h"
-#include "Normalize.h"
-#include "NormalizeImage.h"
 
-#include "Dim.h"
+#include "../neurons/Dim.h"
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-namespace neural_network
+namespace cuda_net
 {
 
-  ActivationFactory& ActivationFactory::get_instance()
+  const std::string SOFTMAX = "SOFTMAX";
+  const std::string RELU = "RELU";
+  const std::string FULLY_CONNECTED = "FULLY_CONNECTED";
+
+  LayerFactory& LayerFactory::get_instance()
   {
-    static ActivationFactory factory_instance;
+    static LayerFactory factory_instance;
     return factory_instance;
   }
 
   std::unique_ptr<Layer> LayerFactory::create(std::string activation_type)
   {
-    switch (activation_type)
+
+    if (activation_type == SOFTMAX)
     {
-      case SOFTMAX:
-        return std::make_unique<Softmax>();
-      case RELU:
-        return std::make_unique<ReLU>();
+      return std::make_unique<Softmax>();
     }
-    throw runtime_error("An invalid activation layer type was given. " +
-      "Accepted types include: SIGMOID, RELU.");
+
+    if (activation_type == RELU)
+    {
+      return std::make_unique<ReLU>();
+    }
+
+    throw std::runtime_error("An invalid activation layer type was given. \
+      Accepted types include: SOFTMAX, RELU.");
   }
 
-  std::unique_ptr<Layer> LayerFactory::create(std::string connection_type
+  std::unique_ptr<Layer> LayerFactory::create(std::string connection_type,
     Dim dim
   ) {
-    switch (connection_type)
+
+    if (connection_type == FULLY_CONNECTED)
     {
-      case FULLY_CONNECTED:
-        return std::make_unique<FullyConnected>(dim);
-      case NORMALIZE:
-        return std::make_unique<Normalize>(dim);
-      case NORMALIZE_IMG:
-        return std::make_unique<NormalizeImage>(dim);
+      return std::make_unique<FullyConnected>(dim);
     }
-    throw runtime_error("An invalid connection layer type was given. " +
-      "Accepted types include: FULLY_CONNECTED, NORMALIZE, NORMALIZE_IMG.");
+
+    throw std::runtime_error("An invalid connection layer type was given. \
+      Accepted types include: FULLY_CONNECTED.");
   }
 }

@@ -4,24 +4,27 @@
 
 #include "../loss/LossFunction.h"
 #include "../layer/Layer.h"
-#include "../optimize/OptimizeFunction.h"
+#include "../neurons/Neurons.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
-namespace neural_network
+namespace cuda_net
 {
 
   class Network
   {
     private:
-      std::vector<Layer*> layers;
+      std::vector<std::unique_ptr<Layer>> layers;
 
       Neurons prob;
       Neurons prob_delta;
 
+      LossFunction* loss_func;
+
     public:
-      Network();
+      Network(std::string loss_type);
 
       ~Network();
 
@@ -31,16 +34,12 @@ namespace neural_network
       // Connection Layer
       void add_layer(std::string layer_type, size_t x, size_t y);
 
-      std::string classify(Neurons& prediction);
-
       void train();
 
-      void forward_propagate();
+      Neurons forward_propagate(Neurons& feature);
 
-      void back_propagate();
-
-      double calculate_loss();
-  }
+      void back_propagate(Neurons& prob, Neurons& actual, float learning_rate);
+  };
 
 }
 

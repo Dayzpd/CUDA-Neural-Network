@@ -4,7 +4,8 @@
 
 #define BLOCK_SIZE 256
 
-namespace neural_network {
+namespace cuda_net
+{
 
   __global__
   void device_relu(float* input, float* output, size_t input_size)

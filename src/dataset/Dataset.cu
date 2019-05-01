@@ -1,6 +1,5 @@
 #include "Dataset.h"
 
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <math.h>
@@ -10,19 +9,13 @@
 #include <thrust/copy.h>
 #include <thrust/host_vector.h>
 
-namespace neural_network
+namespace cuda_net
 {
   /// <summary><c>Dataset</c> constructor facilitates allocation of class
   /// properties.</summary>
   Dataset::Dataset(DatasetConfig& config) : config(config)
   {
     classes = std::vector<std::string>(config.num_classes);
-
-    train_batches = std::vector<Neurons>(config.num_batches);
-    train_targets = std::vector<Neurons>(config.num_batches);
-
-    test_features = std::vector<Neurons>(config.num_test_features);
-    test_targets = std::vector<Neurons>(config.num_test_features);
 
     allocate_test_features();
 
@@ -32,35 +25,13 @@ namespace neural_network
 
     load_batches(config.dataset_path + "/batches/");
 
+    load_test(config.dataset_path + "/test_features.csv");
   }
 
-  /// <summary><c>Dataset</c> destructor deletes all class properties.
-  /// </summary>
+  /// <summary></summary>
   Dataset::~Dataset()
   {
-    delete config;
 
-    delete classes;
-
-    for (auto feature : test_features)
-    {
-      delete feature;
-    }
-
-    for (auto target : test_targets)
-    {
-      delete target;
-    }
-
-    for (auto batch : train_batches)
-    {
-      delete batch;
-    }
-
-    for (auto target : train_targets)
-    {
-      delete target;
-    }
   }
 
   /// <summary><c>allocate_test_features</c> fills both <c>test_features</c>
@@ -68,10 +39,10 @@ namespace neural_network
   /// (1, num_classes).</summary>
   void Dataset::allocate_test_features()
   {
-    for (size_t i = 0; i < num_test_features; i++)
+    for (size_t i = 0; i < config.num_test_features; i++)
     {
-      test_features.push_back(new Neurons(1, config.feature_size));
-      test_targets.push_back(new Neurons(1, config.num_classes));
+      test_features.push_back(Neurons(1, config.feature_size));
+      test_targets.push_back(Neurons(1, config.num_classes));
     }
   }
 
@@ -82,10 +53,8 @@ namespace neural_network
   {
     for (size_t i = 0; i < config.num_batches; i++)
     {
-      train_features.push_back(
-        new Neurons(config.batch_size, config.feature_size));
-      train_targets.push_back(
-        new Neurons(config.batch_size, config.num_classes));
+      train_batches.push_back(Neurons(config.batch_size, config.feature_size));
+      train_targets.push_back(Neurons(config.batch_size, config.num_classes));
     }
   }
 
@@ -98,12 +67,13 @@ namespace neural_network
   /// by 255.</summary>
   void Dataset::load_test(std::string test_set_path)
   {
-    std::ifstream test_features_file(labels_path);
+    std::ifstream file(test_set_path);
 
-    if (!test_features_file.is_open())
+    if (!file.is_open())
     {
-      throw runtime_error("Error (Dataset::load_test): Failed to open test"
-        + " features file.\n");
+      throw std::runtime_error(
+        "Error (Dataset::load_test): Failed to open test features file.\n"
+      );
     }
 
     std::string value_str;
@@ -113,7 +83,7 @@ namespace neural_network
 
     // Read file until end or reached last feature.
     while (
-      test_features_file.good() || feat_num < this->config.num_test_features
+      file.good() || feat_num < this->config.num_test_features
     ) {
       // Info for a single single spans two lines. For loop reads line one for
       // pixel values.
@@ -121,24 +91,24 @@ namespace neural_network
       {
         if (pixel < this->config.feature_size - 1)
         {
-          getLine(test_features_file, value_str, ",");
+          std::getline(file, value_str, ',');
         }
         else
         {
-          getLine(test_features_file, value_str, "\n");
+          std::getline(file, value_str, '\n');
         }
 
         // Convert the string read in and convert to int.
-        value_int = std::stoi(value_str, nullptr, 10);
+        value_int = std::stoi(value_str);
 
         // Normalize the pixel value and place in the host_data for the current
         // feature.
-        this->test_features.at(feat_num).host_data.at(pixel) = value_int / 255.0;
+        test_features.at(feat_num).host_data[pixel] = value_int / 255.0;
       }
 
       // Retrieve the class index and convert to integer.
-      getLine(test_features_file, value_str, "\n");
-      value_int = std::stoi(value_str, nullptr, 10);
+      std::getline(file, value_str, '\n');
+      value_int = std::stoi(value_str);
 
       // Encode class index as one hot and copy to host_data target for the
       // current feature.
@@ -150,7 +120,7 @@ namespace neural_network
       feat_num += 1;
     }
 
-    objects_file.close();
+    file.close();
   }
 
   /// <summary><c>load_batches</c> will loop through each batch file. For each
@@ -173,13 +143,17 @@ namespace neural_network
     for (int batch_num = 0; batch_num < config.num_batches; batch_num++)
     {
       // Build string for this iteration's batch file.
-      std::ifstream batch_file(
+      std::ifstream file(
         batches_path + "batch_" + std::to_string(batch_num) + ".csv");
 
-      if (!batch_file.is_open())
+      if (!file.is_open())
       {
-        throw runtime_error("Error (Dataset::load_batches): Failed to open"
-          + " batch file (Batch number: " + std::to_string(batch_num) + ").\n");
+        throw std::runtime_error(
+          "Error (Dataset::load_batches): Failed to open batch file. \
+          \nBatch number: "
+          + std::to_string(batch_num)
+          + "\n"
+        );
       }
 
       feat_num = 0;
@@ -188,7 +162,7 @@ namespace neural_network
 
       // Read file until end or reached last feature.
       while (
-        batch_file.good() || feat_num < config.batch_size
+        file.good() || feat_num < config.batch_size
       ) {
         // Info for a single single spans two lines. For loop reads line one for
         // pixel values.
@@ -196,28 +170,28 @@ namespace neural_network
         {
           if (pixel < this->config.feature_size - 1)
           {
-            getLine(batch_file, value_str, ",");
+            std::getline(file, value_str, ',');
           }
           else
           {
-            getLine(batch_file, value_str, "\n");
+            std::getline(file, value_str, '\n');
           }
 
           // Convert the string read in and convert to int.
-          value_int = std::stoi(value_str, nullptr, 10);
+          value_int = std::stoi(value_str);
 
           // Calulate host_data index
           int host_data_index = feat_num * config.feature_size + pixel;
 
           // Normalize the pixel value and place in the host_data for the
           // current feature.
-          this->train_batches.at(batch_num).host_data.at(host_data_index)
+          train_batches.at(batch_num).host_data[host_data_index]
             = value_int / 255.0;
         }
 
         // Retrieve the class index and convert to integer.
-        getLine(test_features_file, value_str, "\n");
-        value_int = std::stoi(value_str, nullptr, 10);
+        std::getline(file, value_str, '\n');
+        value_int = std::stoi(value_str);
 
         // Encode class index as one hot and copy to host_data target for the
         // current feature.
@@ -231,7 +205,7 @@ namespace neural_network
         feat_num += 1;
       }
 
-      batch_file.close();
+      file.close();
     }
   }
 
@@ -240,49 +214,57 @@ namespace neural_network
   /// <c>classes</c> vector.</summary>
   void Dataset::register_classes(std::string objects_path)
   {
-    std::ifstream objects_file(objects_path);
+    std::ifstream file(objects_path);
 
-    if (!objects_file.is_open())
+    if (!file.is_open())
     {
-      throw runtime_error("Error (Dataset::register_classes): Failed to load"
-        + " object labels file.\n");
+      throw std::runtime_error(
+        "Error (Dataset::register_classes): Failed to load object labels.\n"
+      );
     }
 
     std::string class_name;
     std::string class_index_str;
+    int class_index_int;
 
-    while (objects_file.good())
+    while (file.good())
     {
-      getLine(objects_file, class_name, ",");
-      getLine(objects_file, class_index, "\n");
+      std::getline(file, class_name, ',');
+      std::getline(file, class_index_str, '\n');
 
-      int class_index_int = std::stoi(class_index_str, nullptr, 10);
+      int class_index_int = std::stoi(class_index_str);
 
       if (class_index_int >= classes.size())
       {
-        throw runtime_error("Error (Dataset::register_classes): Object labels"
-          + " file contains an index value greater than or equal to the number"
-          + " of user-specified classes. Ensure that class indexing begins at"
-          + " 0 and all following classes increment their index by 1.\n");
+        throw std::runtime_error(
+          "Error (Dataset::register_classes): Object labels file contains an \
+          index value greater than or equal to the number of user-specified \
+          classes. Ensure that class indexing begins at 0 and all following \
+          classes increment their index by 1.\n"
+        );
       }
 
       classes.at(class_index_int) = class_name;
     }
 
-    objects_file.close();
+    file.close();
   }
 
   /// <summary><c>decode_one_hot</c> finds and returns the index that has a
   /// value of 1.</summary>
-  int Dataset::decode_one_hot(std::vector one_hot)
+  int Dataset::decode_one_hot(std::vector<int> one_hot)
   {
     if (one_hot.size() != classes.size())
     {
-      throw runtime_error("Error (Dataset::decode_one_hot): one hot vector"
-        + " supplied to the method has size not equal to the number of classes"
-        + " registered in the dataset (one_hot_vector size: "
-        + std::to_string(one_hot.size()) + ", classes size: "
-        + std::to_string(classes.size()) + ").\n");
+      throw std::runtime_error(
+        "Error (Dataset::decode_one_hot): one hot vector supplied to the \
+        method has size not equal to the number of classes registered in the \
+        dataset. \n one_hot_vector size: "
+        + std::to_string(one_hot.size())
+        + "\n classes size: "
+        + std::to_string(classes.size())
+        + "\n"
+      );
     }
 
     int class_index = -1;
@@ -298,8 +280,10 @@ namespace neural_network
 
     if (class_index == -1)
     {
-      throw runtime_error("Error (Dataset::decode_one_hot): one hot vector"
-        + " supplied to the method contains no value equal to 1.\n");
+      throw std::runtime_error(
+        "Error (Dataset::decode_one_hot): one hot vector supplied to the \
+        method contains no value equal to 1.\n"
+      );
     }
 
     return class_index;
@@ -311,10 +295,14 @@ namespace neural_network
   {
     if (class_index < 0 || class_index >= classes.size())
     {
-      throw runtime_error("Error (Dataset::encode_one_hot): class_index"
-        + " supplied to the method is not within the range: [0, "
-        + std::to_string(classes.size() - 1) + "]. Class index provided: "
-        + std::to_string(class_index) + ".\n");
+      throw std::runtime_error(
+        "Error (Dataset::encode_one_hot): class_index supplied to the method \
+        is not within the range: [0, "
+        + std::to_string(classes.size() - 1)
+        + "].\n Class index provided: "
+        + std::to_string(class_index)
+        + "\n"
+      );
     }
 
     std::vector<int> one_hot_vector(classes.size(), 0);
@@ -323,15 +311,18 @@ namespace neural_network
   }
 
   /// <summary><c>get_batch</c> returns a single requested batch.</summary>
-  Neurons& get_batch(int batch_num)
+  Neurons& Dataset::get_batch(int batch_num)
   {
     if (batch_num >= config.num_batches || batch_num < 0)
     {
-      throw runtime_error("Error (Dataset::get_batch): A batch was requested"
-        + " that does not exist.\n"
-        + "Valid input range: [ 0, " + std::to_string(config.num_batches - 1)
-        + " ]\n"
-        + "Batch number requested: " + std::to_string(batch_num) + "\n");
+      throw std::runtime_error(
+        "Error (Dataset::get_batch): A batch was requested that does not \
+        exist. Valid input range: [ 0, "
+        + std::to_string(config.num_batches - 1)
+        + " ].\n Batch number requested: "
+        + std::to_string(batch_num)
+        + "\n"
+      );
     }
 
     return train_batches.at(batch_num);
@@ -339,15 +330,18 @@ namespace neural_network
 
   /// <summary><c>get_batch_targets</c> returns the one hot encoded targets
   /// for the requested batch.</summary>
-  Neurons& get_batch_targets(int batch_num)
+  Neurons& Dataset::get_batch_targets(int batch_num)
   {
     if (batch_num >= config.num_batches || batch_num < 0)
     {
-      throw runtime_error("Error (Dataset::get_batch_targets): Batch targets
-        + " were requested that do not exist.\n"
-        + "Valid input range: [ 0, " + std::to_string(config.num_batches - 1)
-        + " ]\n"
-        + "Batch number requested: " + std::to_string(batch_num) + "\n");
+      throw std::runtime_error(
+        "Error (Dataset::get_batch_targets): Batch targets were requested that \
+        do not exist. Valid input range: [ 0, "
+        + std::to_string(config.num_batches - 1)
+        + " ].\n Batch number requested: "
+        + std::to_string(batch_num)
+        + "\n"
+      );
     }
 
     return train_targets.at(batch_num);
@@ -355,34 +349,40 @@ namespace neural_network
 
   /// <summary><c>get_test_feature</c> returns a single test feature.
   /// </summary>
-  Neurons& get_test_feature(int feature_num)
+  Neurons& Dataset::get_test_feature(int feature_num)
   {
     if (feature_num >= config.num_test_features || feature_num < 0)
     {
-      throw runtime_error("Error (Dataset::get_test_feature): A test feature"
-        + " was requested that does not exist.\n"
-        + "Valid input range: [ 0, "
-        + std::to_string(config.num_test_features - 1) + " ]\n"
-        + "Feature number requested: " + std::to_string(feature_num) + "\n");
+      throw std::runtime_error(
+        "Error (Dataset::get_test_feature): A test feature was requested that \
+        does not exist.\n Valid input range: [ 0, "
+        + std::to_string(config.num_test_features - 1)
+        + " ].\n Feature number requested: "
+        + std::to_string(feature_num)
+        + "\n"
+      );
     }
 
-    return test_features.at(batch_num);
+    return test_features.at(feature_num);
   }
 
   /// <summary><c>get_test_feature</c> returns the one hot encoded target
   /// for a single test feature.</summary>
-  Neurons& get_test_target(int feature_num)
+  Neurons& Dataset::get_test_target(int feature_num)
   {
     if (feature_num >= config.num_test_features || feature_num < 0)
     {
-      throw runtime_error("Error (Dataset::get_test_feature): A test feature"
-        + " target was requested that does not exist.\n"
-        + "Valid input range: [ 0, "
-        + std::to_string(config.num_test_features - 1) + " ]\n"
-        + "Feature number requested: " + std::to_string(feature_num) + "\n");
+      throw std::runtime_error(
+        "Error (Dataset::get_test_feature): A test feature target was \
+        requested that does not exist. Valid input range: [ 0, "
+        + std::to_string(config.num_test_features - 1)
+        + " ].\n Feature number requested: "
+        + std::to_string(feature_num)
+        + "\n"
+      );
     }
 
-    return test_targets.at(batch_num);
+    return test_targets.at(feature_num);
   }
 
   /// <summary><c>get_class_index</c> loops through each string value in the
@@ -398,22 +398,29 @@ namespace neural_network
       }
     }
 
-    throw runtime_error("Error (Dataset::get_class_index): class_name"
-      + " supplied to the method has not been registered. Class name provided: "
-      + class_name + ".\n");
+    throw std::runtime_error(
+      "Error (Dataset::get_class_index): class_name supplied to the method has \
+      not been registered.\n Class name provided: "
+      + class_name
+      + ".\n"
+    );
   }
 
   /// <summary><c>get_class_index</c> returns the class name of a class index.
   /// If the class index is not within the index range of classes, a
   /// runtime_error is thrown.</summary>
-  int Dataset::get_class_name(int class_index)
+  std::string Dataset::get_class_name(int class_index)
   {
     if (class_index < 0 || class_index >= classes.size())
     {
-      throw runtime_error("Error (Dataset::get_class_name): class_index"
-        + " supplied to the method is not within the range: [0, "
-        + std::to_string(classes.size() - 1) + "]. Class index provided: "
-        + std::to_string(class_index) + ".\n");
+      throw std::runtime_error(
+        "Error (Dataset::get_class_name): class_index supplied to the method \
+        is not within the range: [0, "
+        + std::to_string(classes.size() - 1)
+        + "].\n Class index provided: "
+        + std::to_string(class_index)
+        + ".\n"
+      );
     }
 
     return classes.at(class_index);

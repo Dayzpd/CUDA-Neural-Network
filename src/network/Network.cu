@@ -1,29 +1,23 @@
+
+#include "Network.h"
 #include "../layer/LayerFactory.h"
 #include "../loss/LossFactory.h"
-#include "../optimize/OptimizeFactory.h"
-#include "Network.h"
 
-namespace neural_network
+namespace cuda_net
 {
 
-  Network::Network(std::string loss_type) : prob(), prob_delta()
+  Network::Network(std::string loss_type) :
+    loss_func(LossFactory::get_instance().create(loss_type))
   {
 
   }
 
   Network::~Network()
   {
-    for (auto layer : layers)
+    for (auto& layer : layers)
     {
-      delete layer;
+      layer.reset();
     }
-  }
-
-  void Network::add_batch(Neurons features, Neurons classes)
-  {
-    batches.push_back(features);
-    actuals.push_back(classes);
-    num_batches += 1;
   }
 
   void Network::add_layer(std::string layer_type)
@@ -36,33 +30,12 @@ namespace neural_network
     layers.push_back(LayerFactory::get_instance().create(layer_type, Dim(x, y)));
   }
 
-  std::string classify(Neurons& prediction)
-  {
-    prediction->memcpy_device_to_host();
-
-    float max = prediction[0];
-    for (size_t x = 1; x < prediction.dim.x * prediction.dim.y; x++)
-    {
-      if (max < prediction[x])
-      {
-        max = prediction[x];
-      }
-    }
-
-    return max;
-  }
-
-  void Network::train(int num_epochs, float learning_rate, int checkpt = 100)
-  {
-
-  }
-
-  Neurons forward_propagate(Neurons& feature)
+  Neurons Network::forward_propagate(Neurons& feature)
   {
     Neurons output = feature;
-    for (auto layer : layers)
+    for (auto& layer : layers)
     {
-      output = layer->forward_prop(layer_output);
+      output = layer->forward_prop(output);
     }
 
     prob = output;
@@ -70,17 +43,18 @@ namespace neural_network
     return prob;
   }
 
-  void back_propagate(Neurons& prob, Neurons& actual)
-  {
+  void Network::back_propagate(Neurons& prob, Neurons& actual,
+    float learning_rate
+  ) {
     prob_delta.allocate_memory(prob.dim);
 
-    Neurons err = this->loss_func->calculate_deriv(prob, actual, prob_delta);
+    Neurons err = loss_func->calculate_deriv(prob, actual, prob_delta);
 
-    for (std::vector<int>::reverse_iterator i = layers.rbegin();
-      i != layers.rend(); i++)
+    for (auto iter = layers.rbegin(); iter != layers.rend(); iter++)
     {
-      err = *i->back_prop(err, learning_rate);
+      err = (*iter)->back_prop(err, learning_rate);
     }
+
   }
 
 }

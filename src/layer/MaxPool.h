@@ -4,7 +4,8 @@
 
 #include "Connection.h"
 
-namespace neural_network {
+namespace cuda_net
+{
 
   class MaxPool : public Connection
   {

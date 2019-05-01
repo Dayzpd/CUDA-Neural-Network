@@ -5,17 +5,16 @@
 
 #define BLOCK_SIZE 512
 
-namespace neural_network
+namespace cuda_net
 {
   __global__
-  void device_cross_entropy(float* p, float* y, size_t actual_size,
-    float* loss
-  ) {
-    int t_id = blockId.x * blockDim.x + threadIdx.x;
+  void device_cross_entropy(float* p, float* y, float* loss, size_t actual_size)
+  {
+    int t_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (t_id < actual_size && y[t_id] == 1)
     {
-      atomicSub(&loss, __logf(p[t_id]));
+      atomicAdd(loss, - __logf(p[t_id]));
     }
   }
 
@@ -23,7 +22,7 @@ namespace neural_network
   void device_cross_entropy_deriv(float* p, float* y, float* p_delta,
     size_t actual_size
   ) {
-    int t_id = blockId.x * blockDim.x + threadIdx.x;
+    int t_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (t_id < actual_size)
     {
@@ -42,8 +41,9 @@ namespace neural_network
 
     // Unified Memory
     // https://devblogs.nvidia.com/unified-memory-cuda-beginners/
-    cudaMallocManaged(&loss, size_of(float))
-    loss* = 0.0f;
+    cudaMallocManaged(&loss, sizeof(float));
+
+    *loss = 0.0f;
 
     dim3 block_size(BLOCK_SIZE);
     dim3 grid_size(ceil(actual_size / BLOCK_SIZE));

@@ -1,45 +1,37 @@
 
-#include "BinaryCrossEntropy.h"
-#include "Hinge.h"
-#include "MeanSquaredError.h"
-#include "Softmax.h"
+#include "LossFactory.h"
+#include "CrossEntropy.h"
 
 #include <memory>
 #include <stdexcept>
 
-namespace neural_network
+namespace cuda_net
 {
+  const std::string CROSS_ENTROPY = "CROSS_ENTROPY";
+
+  LossFactory& LossFactory::get_instance()
+  {
+    static LossFactory factory_instance;
+    return factory_instance;
+  }
+
   /// <summary><c>create</c> serves as a factory function that returns an
   /// loss function of the specified type.</summary>
   /// <param name="loss_type">The <c>LossFactory</c> class supplies constants
-  /// that must to be used (e.g. <c>LossFactory::BINARY_CROSS_ENTROPY</c>,
-  /// <c>LossFactory::HINGE</c>, <c>LossFactory::MEAN_SQUARED_ERROR</c>,
-  /// <c>LossFactory::SOFTMAX</c></param name>
-  /// <returns>Returns a pointer to an loss function of the specified
+  /// that must to be used (e.g. <c>LossFactory::CROSS_ENTROPY</c>).
+  /// </param name>
+  /// <returns>Returns a pointer to the loss function of the specified
   /// type.</returns>
-  LossFunction& LossFactory::create(Type loss_type)
+  std::unique_ptr<LossFunction> LossFactory::create(std::string loss_type)
   {
     switch (loss_type)
     {
-      case BINARY_CROSS_ENTROPY:
-        static BinaryCrossEntropy bce_instance;
-        return bce_instance;
-      case HINGE:
-        static Hinge hinge_instance;
-        return hinge_instance;
-      case MEAN_SQUARED_ERROR:
-        static MeanSquaredError mse_instance;
-        return mse_instance;
-      case SOFTMAX:
-        static Softmax softmax_instance;
-        return softmax_instance;
+      case CROSS_ENTROPY:
+        return std::make_unique<CrossEntropy>();
     }
     throw runtime_error("An invalid loss function type was given. " +
       "Accepted types include: " +
-      "LossFactory::BINARY_CROSS_ENTROPY, " +
-      "LossFactory::HINGE, " +
-      "LossFactory::MEAN_SQUARED_ERROR, " +
-      "LossFactory::SOFTMAX");
+      "LossFactory::CROSS_ENTROPY");
   }
 
 }

@@ -6,7 +6,8 @@
 #define DIM_SIZE_3D 8
 #define BLOCK_SIZE 1024
 
-namespace neural_network {
+namespace cuda_net
+{
 
   __global__
   void device_row_max_values(float* input, float* max_vals, size_t input_x,
@@ -32,16 +33,15 @@ namespace neural_network {
   ) {
     int x_id = blockIdx.x * blockDim.x + threadIdx.x;
     int y_id = blockIdx.y * blockDim.y + threadIdx.y;
+    int t_id = x_id * input_y + y_id;
 
     if (x_id < input_x && y_id < input_y)
     {
-      int t_id = x_id * input_y + y_id;
-
       output[t_id] = expf(input[t_id] - max_vals[x_id]);
-      atomicAdd(&row_sums[x_id], output[tid]);
+      atomicAdd(&row_sums[x_id], output[t_id]);
       __syncthreads();
 
-      output[t_id] = output[t_id] / row_sums[x_id]
+      output[t_id] = output[t_id] / row_sums[x_id];
     }
   }
 
@@ -64,7 +64,7 @@ namespace neural_network {
   }
 
   __global__
-  void device_softmax_error(float* error, float* jacobian, float* delta
+  void device_softmax_error(float* error, float* jacobian, float* delta,
     size_t softmax_x, size_t softmax_y, size_t jacobian_y
   ) {
     int x_id = blockIdx.x * blockDim.x + threadIdx.x; // x_id: row #
@@ -107,17 +107,17 @@ namespace neural_network {
     cudaMalloc((void**)&row_sums, input.dim.x * sizeof(float));
     cudaMemset(row_sums, 0, input.dim.x * sizeof(float));
 
-    dim3 block_size(BLOCK_SIZE);
-    dim3 grid_size(ceil(input.dim.x / BLOCK_SIZE));
+    dim3 block_size_1(BLOCK_SIZE);
+    dim3 grid_size_1(ceil(input.dim.x / BLOCK_SIZE));
 
-    device_max_row_values<<<grid_size, block_size>>>(input.get_device_pointer(),
-      &row_max[0], input.dim.x, input.dim.y);
+    device_row_max_values<<<grid_size_1, block_size_1>>>(
+      input.get_device_pointer(), &row_max[0], input.dim.x, input.dim.y);
 
-    dim3 block_size(DIM_SIZE_2D, DIM_SIZE_2D - (DIM_SIZE_2D % input.dim.y));
-    dim3 grid_size(ceil((input.dim.x * input.dim.y)
-      / (block_size.x * block_size.y)));
+    dim3 block_size_2(DIM_SIZE_2D, DIM_SIZE_2D - (DIM_SIZE_2D % input.dim.y));
+    dim3 grid_size_2(ceil((input.dim.x * input.dim.y)
+      / (block_size_2.x * block_size_2.y)));
 
-    device_softmax<<<grid_size, block_size>>>(input.get_device_pointer(),
+    device_softmax<<<grid_size_2, block_size_2>>>(input.get_device_pointer(),
       &row_max[0], &row_sums[0], output.get_device_pointer(), input.dim.x,
       input.dim.y);
 
@@ -137,18 +137,18 @@ namespace neural_network {
     cudaMemset(jacobian, 0,
       output.dim.x * output.dim.y * output.dim.y * sizeof(float));
 
-    dim3 block_size(DIM_SIZE_3D, DIM_SIZE_3D, DIM_SIZE_3D);
-    dim3 grid_size(ceil((delta.dim.x * delta.dim.y)
-      / (block_size.x * block_size.y * block_size.z)));
+    dim3 block_size_1(DIM_SIZE_3D, DIM_SIZE_3D, DIM_SIZE_3D);
+    dim3 grid_size_1(ceil((delta.dim.x * delta.dim.y)
+      / (block_size_1.x * block_size_1.y * block_size_1.z)));
 
-    device_softmax_jacobian<<<grid_size, block_size>>>(
+    device_softmax_jacobian<<<grid_size_1, block_size_1>>>(
       output.get_device_pointer(), &jacobian[0], output.dim.x, output.dim.y,
       output.dim.y * output.dim.y);
 
-    dim3 block_size(DIM_SIZE_2D, DIM_SIZE_2D);
-    dim3 grid_size(ceil((delta.dim.x * delta.dim.y) / BLOCK_SIZE));
+    dim3 block_size_2(DIM_SIZE_2D, DIM_SIZE_2D);
+    dim3 grid_size_2(ceil((delta.dim.x * delta.dim.y) / BLOCK_SIZE));
 
-    device_softmax_error<<<grid_size, block_size>>>(
+    device_softmax_error<<<grid_size_2, block_size_2>>>(
       error.get_device_pointer(), &jacobian[0], delta.get_device_pointer(),
       output.dim.x, output.dim.y, output.dim.y * output.dim.y);
 
