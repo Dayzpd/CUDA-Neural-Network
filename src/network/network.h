@@ -2,7 +2,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "../loss/LossFunction.h"
+#include "../loss/CrossEntropy.h"
 #include "../layer/Layer.h"
 #include "../neurons/Neurons.h"
 
@@ -16,29 +16,27 @@ namespace cuda_net
   class Network
   {
     private:
-      std::vector<std::unique_ptr<Layer>> layers;
+      std::vector<Layer*> layers;
 
       Neurons prob;
       Neurons prob_delta;
 
-      LossFunction* loss_func;
+      CrossEntropy loss_func;
 
     public:
-      Network(std::string loss_type);
+      Network();
 
       ~Network();
 
-      // Activation Layer
-      void add_layer(std::string layer_type);
-
-      // Connection Layer
-      void add_layer(std::string layer_type, size_t x, size_t y);
+      void add_layer(Layer* layer);
 
       void train();
 
       Neurons forward_propagate(Neurons& feature);
 
       void back_propagate(Neurons& prob, Neurons& actual, float learning_rate);
+
+      float batch_train_loss(Neurons& prob, Neurons& batch_targets);
   };
 
 }

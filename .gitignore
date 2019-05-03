@@ -1,3 +1,4 @@
-dataset/
+data/
 formatted_dataset/
-build.sh
+*.sh
+include/

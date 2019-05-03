@@ -4,6 +4,7 @@
 
 #include "LossFunction.h"
 
+#include <memory>
 #include <string>
 
 namespace cuda_net
@@ -19,7 +20,7 @@ namespace cuda_net
 
       static LossFactory& get_instance();
 
-      static LossFunction* create(std::string loss_type);
+      static std::unique_ptr<LossFunction> create(std::string loss_type);
   };
 
 }
