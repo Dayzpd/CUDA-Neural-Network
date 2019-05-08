@@ -1,60 +1,88 @@
 #include "Neurons.h"
 
-namespace cuda_net
+#include <iostream>
+
+#include <thrust/system_error.h>
+
+Neurons::Neurons(size_t x, size_t y) : dim(x, y), allocated(false)
 {
 
-  Neurons::Neurons(size_t x, size_t y) : dim(x, y)
-  {
-    allocate_memory();
-  }
+}
 
-  Neurons::Neurons(Dim dim) : Neurons(dim.x, dim.y)
-  {
+Neurons::Neurons(Dim dim) : Neurons(dim.x, dim.y)
+{
 
-  }
+}
 
-  // Concrete allocation primarily used for weights and biases that have fixed
-  // user-defined sizes.
-  void Neurons::allocate_memory()
+Neurons::~Neurons()
+{
+  device_data.clear();
+  device_data.shrink_to_fit();
+  host_data.clear();
+  host_data.shrink_to_fit();
+}
+
+// Concrete allocation primarily used for weights and biases that have fixed
+// user-defined sizes.
+void Neurons::allocate_memory()
+{
+  if (!allocated)
   {
-    if (!allocated)
+    try
     {
       host_data = thrust::host_vector<float>(dim.x * dim.y);
       device_data = thrust::device_vector<float>(dim.x * dim.y);
-      allocated = true;
     }
-  }
-
-  // On the fly allocation primarily used to allocate layer outputs.
-  void Neurons::allocate_memory(Dim dim)
-  {
-    if (!allocated)
+    catch(thrust::system_error &e)
     {
-      this->dim = dim;
-      host_data = thrust::host_vector<float>(dim.x * dim.y);
-      device_data = thrust::device_vector<float>(dim.x * dim.y);
-      allocated = true;
+      std::cerr << "Error [Neurons::allocate_memory()]: Failed to \
+        allocate memory." << std::endl;
+      exit(-1);
     }
-  }
 
-  void Neurons::allocate_memory(size_t x, size_t y)
+    allocated = true;
+  }
+}
+
+// On the fly allocation primarily used to allocate layer outputs.
+void Neurons::allocate_memory(Dim dim)
+{
+  if (!allocated)
   {
-    allocate_memory(Dim(x, y));
-  }
+    this->dim = dim;
 
-  void Neurons::memcpy_host_to_device()
-  {
-    device_data = host_data;
-  }
+    try
+    {
+      host_data = thrust::host_vector<float>(dim.x * dim.y, 0.0f);
+      device_data = host_data;
+    }
+    catch(thrust::system_error &e)
+    {
+      std::cerr << "Error [Neurons::allocate_memory(Dim dim)]: Failed to \
+        allocate memory." << std::endl;
+      exit(-1);
+    }
 
-  void Neurons::memcpy_device_to_host()
-  {
-    host_data = device_data;
+    allocated = true;
   }
+}
 
-  float* Neurons::get_device_pointer()
-  {
-    return thrust::raw_pointer_cast(&device_data[0]);
-  }
+void Neurons::allocate_memory(size_t x, size_t y)
+{
+  allocate_memory(Dim(x, y));
+}
 
+void Neurons::memcpy_host_to_device()
+{
+  device_data = host_data;
+}
+
+void Neurons::memcpy_device_to_host()
+{
+  host_data = device_data;
+}
+
+float* Neurons::get_device_pointer()
+{
+  return thrust::raw_pointer_cast(device_data.data());
 }

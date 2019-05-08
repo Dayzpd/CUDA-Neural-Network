@@ -4,24 +4,19 @@
 
 #include <string>
 
-namespace cuda_net
+struct DatasetConfig
 {
+std::string dataset_path;
+int batch_size;
+int dim_size;
+int feature_size;
+int num_batches;
+int num_classes;
+int num_test_features;
 
-  struct DatasetConfig
-  {
-    std::string dataset_path;
-    int batch_size;
-    int dim_size;
-    int feature_size;
-    int num_batches;
-    int num_classes;
-    int num_test_features;
+DatasetConfig(std::string dataset_path);
 
-    DatasetConfig(std::string dataset_path);
-
-    ~DatasetConfig();
-  };
-
-}
+~DatasetConfig();
+};
 
 #endif

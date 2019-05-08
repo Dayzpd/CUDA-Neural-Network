@@ -5,26 +5,26 @@
 #include "Layer.h"
 #include "../neurons/Neurons.h"
 
-namespace cuda_net
+#include <string>
+
+class ReLU : public Layer
 {
+private:
+  Neurons input;
+  Neurons output;
+  Neurons delta;
 
-  class ReLU : public Layer
-  {
-    private:
-      Neurons input;
-      Neurons output;
-      Neurons delta;
+  std::string name;
 
-    public:
-      ReLU();
+public:
+  ReLU(std::string name);
 
-      ~ReLU();
+  ~ReLU();
 
-      Neurons& forward_prop(Neurons& input);
+  Neurons& forward_prop(Neurons& input);
 
-      Neurons& back_prop(Neurons& input, float learning_rate);
-  };
+  Neurons& back_prop(Neurons& input, float learning_rate);
+};
 
-}
 
 #endif

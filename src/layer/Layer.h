@@ -4,19 +4,14 @@
 
 #include "../neurons/Neurons.h"
 
-namespace cuda_net
+
+class Layer
 {
+public:
+  virtual Neurons& forward_prop(Neurons& input) = 0;
 
-  class Layer
-  {
-    public:
-      virtual ~Layer() = 0;
+  virtual Neurons& back_prop(Neurons& input, float learning_rate) = 0;
+};
 
-      virtual Neurons& forward_prop(Neurons& input) = 0;
-
-      virtual Neurons& back_prop(Neurons& input, float learning_rate) = 0;
-  };
-
-}
 
 #endif

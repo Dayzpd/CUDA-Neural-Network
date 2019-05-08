@@ -1,4 +1,3 @@
 data/
 formatted_dataset/
-*.sh
-include/
+bin/

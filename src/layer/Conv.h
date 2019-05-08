@@ -9,6 +9,8 @@ namespace cuda_net
 
   class Conv : public Connection
   {
+    int kernel_dim
+
     public:
   }
 
