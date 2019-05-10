@@ -6,8 +6,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_ptr.h>
 
-#define DIM_SIZE_2D 32
-#define DIM_SIZE_3D 8
+#define DIM_SIZE 32
 #define BLOCK_SIZE 1024
 
 __global__
@@ -18,11 +17,8 @@ void device_cross_entropy(float* p, float* y, float* loss, size_t actual_x,
 
   if (t_id < actual_x * actual_y && y[t_id] == 1)
   {
-
     float loss_val = -__logf(p[t_id]) / (float)actual_x;
     atomicAdd(loss, loss_val);
-    //printf("LOSS: %f, PROB: %f, ACTUAL[%d]: %f\n", loss_val, p[t_id], t_id, y[t_id]);
-
   }
 }
 
@@ -135,7 +131,7 @@ Neurons& SoftmaxCE::forward_prop(Neurons& input)
     host_row_max.shrink_to_fit();
   }
 
-  dim3 block_size_2(DIM_SIZE_2D, DIM_SIZE_2D - (DIM_SIZE_2D % input.dim.y));
+  dim3 block_size_2(DIM_SIZE, DIM_SIZE - (DIM_SIZE % input.dim.y));
   dim3 grid_size_2(
     ( (input.dim.x * input.dim.y) + (block_size_2.x * block_size_2.y) - 1 ) /
     (block_size_2.x * block_size_2.y)

@@ -3,13 +3,15 @@
 #include "../src/dataset/Dataset.h"
 #include "../src/layer/FullyConnected.h"
 #include "../src/layer/ReLU.h"
-#include "../src/layer/Softmax.h"
-#include "../src/loss/CrossEntropy.h"
+#include "../src/layer/Conv2D.h"
+#include "../src/layer/MaxPool.h"
+#include "../src/output/SoftmaxCE.h"
 #include "../src/neurons/Dim.h"
 #include "../src/neurons/Neurons.h"
 
 #include <iostream>
 #include <string>
+#include <time.h>
 #include <vector>
 
 /*
@@ -180,7 +182,7 @@ void softmax_ce_test()
   test_actuals.allocate_memory();
   thrust::copy(targets.begin(), targets.end(), test_actuals.device_data.begin());
 
-  Softmax softmax_test("SOFTMAX_TEST", true);
+  SoftmaxCE softmax_test("SOFTMAX_TEST", true);
   Neurons softmax_test_output = softmax_test.forward_prop(test_input);
   softmax_test_output.memcpy_device_to_host();
 
@@ -189,7 +191,6 @@ void softmax_ce_test()
     std::cout << "SOFTMAX[" << x << "] = " << softmax_test_output.host_data[x] << std::endl;
   }
 
-  //CrossEntropy ce_test;
   float loss = softmax_test.loss(test_actuals);
 
   std::cout << "LOSS = " << loss << std::endl;
@@ -197,22 +198,134 @@ void softmax_ce_test()
   Neurons test_error;
   test_error = softmax_test.back_prop(test_actuals);
   test_error.memcpy_device_to_host();
-  /*
-  for (int x = 0; x < test_error.dim.x * test_error.dim.y; x++)
-  {
-    std::cout << "CE_ERR[" << x << "] = " << test_error.host_data[x] << std::endl;
-  }
 
-  test_error = softmax_test.back_prop(test_error, .01);
-
-  test_error.memcpy_device_to_host();
-*/
   for (int x = 0; x < test_error.dim.x * test_error.dim.y; x++)
   {
     std::cout << "SOFTMAX_ERR[" << x << "] = " << test_error.host_data[x] << std::endl;
   }
 }
 
+void conv_test()
+{
+  std::vector<float> vals = {
+    0.2, 0.3, 0.6,
+    0.8, 0.0, 0.3,
+    0.5, 0.5, 0.0,
+
+    0.0, 0.7, 0.1,
+    0.1, 0.6, 0.0,
+    0.9, 0.0, 0.2
+  };
+
+  std::vector<float> err_vals = {
+    0.1, 0.2,
+    0.0, 0.0,
+
+    0.0, 0.6,
+    0.1, 0.4
+  };
+
+  Neurons test_input(2, 9);
+  test_input.allocate_memory();
+  thrust::copy(vals.begin(), vals.end(), test_input.device_data.begin());
+
+  Neurons test_err(2, 4);
+  test_err.allocate_memory();
+  thrust::copy(err_vals.begin(), err_vals.end(), test_err.device_data.begin());
+
+  Conv2D conv_test(2, "CONV_TEST", true);
+  Neurons conv_test_output = conv_test.forward_prop(test_input);
+  conv_test_output.memcpy_device_to_host();
+
+  std::cout << "### CONV FORWARD ###" << std::endl;
+  for (int x = 0; x < conv_test_output.host_data.size(); x++)
+  {
+    if (x != 0 && x != 4 && x % 2 == 0)
+    {
+      std::cout << std::endl;
+    }
+    else if (x % 4 == 0)
+    {
+      std::cout << std::endl;
+    }
+
+    std::cout  << conv_test_output.host_data[x] << " | ";
+  }
+
+  Neurons test_delta = conv_test.back_prop(test_err, .01);
+  test_delta.memcpy_device_to_host();
+
+  std::cout << "\n### CONV BACKWARD ###" << std::endl;
+
+  for (int x = 0; x < test_delta.host_data.size(); x++)
+  {
+    if (x != 0 && x != 9 && x % 3 == 0)
+    {
+      std::cout << std::endl;
+    }
+    else if (x % 9 == 0)
+    {
+      std::cout << std::endl;
+    }
+
+    std::cout  << test_delta.host_data[x] << " | ";
+  }
+}
+
+void max_pool_test()
+{
+  /*std::vector<float> vals = {
+    0.2, 0.3, 0.6, 0.0,
+    0.8, 0.0, 0.3, 0.0,
+    0.5, 0.4, 0.0, 0.0,
+    0.0, 0.7, 0.1, 0.0,
+    0.0, 0.7, 0.1, 0.0,
+    0.8, 0.0, 0.3, 0.0,
+    0.5, 0.4, 0.0, 0.0,
+    0.2, 0.3, 0.6, 0.0
+  };*/
+  std::vector<float> vals = {
+    3,4,2,
+    1,5,0,
+    8,6,4
+  };
+
+  Neurons test_input(1, 9);
+  test_input.allocate_memory();
+  thrust::copy(vals.begin(), vals.end(), test_input.device_data.begin());
+
+  MaxPool mp_test(2, "CONV_TEST", true);
+  Neurons mp_test_output = mp_test.forward_prop(test_input);
+  mp_test_output.memcpy_device_to_host();
+  Neurons max_indices = mp_test.get_max_indices();
+  max_indices.memcpy_device_to_host();
+  for (int x = 0; x < mp_test_output.host_data.size(); x++)
+  {
+    std::cout << "MAX_POOL[" << x << "] = " << mp_test_output.host_data[x] << std::endl;
+  }
+
+  for (int x = 0; x < max_indices.host_data.size(); x++)
+  {
+    std::cout << "MAX_IND[" << x << "] = " << max_indices.host_data[x] << std::endl;
+  }
+
+  std::vector<float> test_err_vals = {
+    -1.4,0.8,
+    0.2,0.3
+  };
+
+  Neurons test_err_input(1, 4);
+  test_err_input.allocate_memory();
+  thrust::copy(test_err_vals.begin(), test_err_vals.end(), test_err_input.device_data.begin());
+
+  Neurons back_prop_test = mp_test.back_prop(test_err_input, .01);
+  back_prop_test.memcpy_device_to_host();
+
+  for (int x = 0; x < back_prop_test.host_data.size(); x++)
+  {
+    std::cout << "BACK_PROP[" << x << "] = " << back_prop_test.host_data[x] << std::endl;
+  }
+}
 
 int main()
 {
@@ -221,6 +334,8 @@ int main()
   std::cout << "Option 1: fc layer test" << std::endl;
   std::cout << "Option 2: relu layer test" << std::endl;
   std::cout << "Option 3: softmax ce test" << std::endl;
+  std::cout << "Option 4: conv test" << std::endl;
+  std::cout << "Option 5: max pool test" << std::endl;
   std::cout << "Selection: ";
 
   int option;
@@ -239,6 +354,12 @@ int main()
       break;
     case 3:
       softmax_ce_test();
+      break;
+    case 4:
+      conv_test();
+      break;
+    case 5:
+      max_pool_test();
       break;
   }
 

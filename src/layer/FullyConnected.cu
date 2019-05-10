@@ -136,8 +136,6 @@ void FullyConnected::init_weights()
 
 void FullyConnected::init_biases()
 {
-  biases.allocate_memory();
-
   for (size_t y = 0; y < weights.dim.y; y++)
   {
     biases.host_data[y] = 0.01;
@@ -148,25 +146,10 @@ void FullyConnected::init_biases()
 
 Neurons& FullyConnected::forward_prop(Neurons& input)
 {
-  if (input.dim.y != weights.dim.x)
-  {
-    throw std::runtime_error(
-      "Error (FullyConnected::forward_prop): Input y dim does not equal the \
-      weights' x dim. \
-      \nLayer Name: "
-      + name
-      + "\nInput Dimensions: (x, y) - ("
-      + std::to_string(input.dim.x) + ", " + std::to_string(input.dim.y) + ")"
-      + "\nWeights Dimensions: (x, y) - ("
-      + std::to_string(weights.dim.x) + ", " + std::to_string(weights.dim.y)
-      + ")\n"
-    );
-  }
+  assert(input.dim.y == weights.dim.x);
 
   this->input = input;
   output.allocate_memory(Dim(input.dim.x, weights.dim.y));
-
-  //std::cout << "output X: " << output.dim.x << "output Y" << output.dim.y << std::endl;
 
   // 2D grid of 2D blocks
   dim3 block_size(DIM_SIZE, DIM_SIZE);

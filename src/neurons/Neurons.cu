@@ -22,6 +22,11 @@ Neurons::~Neurons()
   host_data.shrink_to_fit();
 }
 
+bool Neurons::is_allocated()
+{
+  return allocated;
+}
+
 // Concrete allocation primarily used for weights and biases that have fixed
 // user-defined sizes.
 void Neurons::allocate_memory()
@@ -70,6 +75,17 @@ void Neurons::allocate_memory(Dim dim)
 void Neurons::allocate_memory(size_t x, size_t y)
 {
   allocate_memory(Dim(x, y));
+}
+
+void Neurons::zero_device_memory()
+{
+  if (allocated)
+  {
+    for (int x = 0; x < dim.x * dim.y; x++)
+    {
+      device_data[x] = 0.0f;
+    }
+  }
 }
 
 void Neurons::memcpy_host_to_device()

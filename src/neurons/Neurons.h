@@ -26,6 +26,8 @@ public:
 
   ~Neurons();
 
+  bool is_allocated();
+
   void allocate_memory();
 
   void allocate_memory(Dim dim);
@@ -33,6 +35,8 @@ public:
   void allocate_memory(size_t x, size_t y);
 
   void deallocate_memory();
+
+  void zero_device_memory();
 
   void memcpy_host_to_device();
 
